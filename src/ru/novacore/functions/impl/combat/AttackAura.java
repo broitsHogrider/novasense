@@ -127,33 +127,33 @@ public class AttackAura extends Function {
             updateTarget();
         }
 
+        if (target == null || autoPotion.isActive()) {
+            cpsLimit = System.currentTimeMillis();
+            reset();
+            return;
+        }
+        isRotated = false;
 
-        if (target != null && !(autoPotion.isState() && autoPotion.isActive())) {
-            isRotated = false;
-            if (shouldPlayerFalling() && (stopWatch.hasTimeElapsed())) {
+        boolean elytraTarget = mc.player.isElytraFlying();
+        if (type.is("Резкая") && !elytraTarget) {
+            if (shouldAttack()) {
                 updateAttack();
                 ticks = 2;
             }
-            if (type.is("Резкая")) {
-                if (ticks > 0) {
-                    updateRotation(true, 180, 90);
-                    ticks--;
-                } else {
-                    reset();
-                }
+            if (ticks > 0) {
+                updateRotation(true,180.0f, 90.0f);
+                --ticks;
             } else {
-                if (!isRotated) {
-                    updateRotation(false, 80, 35);
-                }
+                reset();
             }
-
-        } else {
-            stopWatch.setLastMS(0);
-            reset();
-
+        }
+        if (type.is("Плавная") || elytraTarget) {
+            if (shouldAttack()) {
+                updateAttack();
+            }
+            updateRotation(false, 180.0f, 90.0f);
         }
     }
-
     @Subscribe
     private void onWalking(EventMotion e) {
         if (target == null || autoPotion.isState() && autoPotion.isActive()) return;
@@ -346,20 +346,18 @@ public class AttackAura extends Function {
         if (sprintSetting.is("Легитный") && autoSprint.isState()) {
             autoSprint.setEmergencyStop(true);
         }
-      if (mc.player.isSprinting())
-          mc.player.setSprinting(false);
+        if (mc.player.isSprinting()) mc.player.setSprinting(false);
 
         if (bypass.get().equals("ReallyWorld")) {
-            stopWatch.setLastMS(500);
+            cpsLimit = System.currentTimeMillis() + 500;
             if(mc.player.isSprinting())
                 mc.player.setSprinting(false);
 
         } else if (bypass.get().equals("LegendsGrief")) {
-            stopWatch.setLastMS(550L + (int) (Math.random() * 71));
+            cpsLimit = System.currentTimeMillis() + 500+ (int) (Math.random() * 71);
             if ((double) mc.timer.timerSpeed == 1.0) {
                 mc.timer.timerSpeed = 1.005F;
-                if(mc.player.isSprinting())
-                    mc.player.setSprinting(false);
+                if(mc.player.isSprinting()) mc.player.setSprinting(false);
             }
         }
 
@@ -476,7 +474,6 @@ public class AttackAura extends Function {
             mc.player.rotationYawOffset = Integer.MIN_VALUE;
         }
         rotateVector = new Vector2f(mc.player.rotationYaw, mc.player.rotationPitch);
-
     }
 
     @Override

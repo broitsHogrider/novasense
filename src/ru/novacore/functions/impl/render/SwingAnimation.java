@@ -4,6 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
+import ru.novacore.functions.impl.combat.AttackAura;
 import ru.novacore.functions.settings.impl.BooleanSetting;
 import ru.novacore.functions.settings.impl.ModeSetting;
 import ru.novacore.functions.settings.impl.SliderSetting;

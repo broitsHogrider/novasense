@@ -5,6 +5,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import ru.novacore.NovaCore;
 import ru.novacore.functions.api.FunctionRegistry;
+import ru.novacore.functions.impl.combat.AttackAura;
 import ru.novacore.functions.impl.render.SwingAnimation;
 import ru.novacore.functions.impl.render.ViewModel;
 import net.minecraft.client.Minecraft;

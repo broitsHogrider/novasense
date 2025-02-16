@@ -60,8 +60,7 @@ public class Panel extends Screen implements IMinecraft {
     @Override
     protected void init() {
         super.init();
-        size = new Vector2f(440, 300);
-        animation.setDirection(Direction.FORWARDS);
+        size = new Vector2f(400, 270);
         position = new Vector2f(window.scaledWidth() / 2f - size.x / 2f, window.scaledHeight() / 2f - size.y / 2f);
     }
     @Override
@@ -73,12 +72,7 @@ public class Panel extends Screen implements IMinecraft {
         mouseY = fixed.getY();
 
         mc.gameRenderer.setupOverlayRendering(2);
-
-        if (animation.finished(Direction.BACKWARDS)) mc.displayGuiScreen(null);
-        MathUtil.scaleStart(position.x + (size.x / 2f), position.y + (size.y / 2f), animation.getOutput());
         renderPanel(matrixStack, mouseX, mouseY);
-        MathUtil.scaleEnd();
-
         scrollingOut = MathUtil.lerp(scrollingOut, scrolling, 10);
         mc.gameRenderer.setupOverlayRendering();
     }
@@ -87,20 +81,30 @@ public class Panel extends Screen implements IMinecraft {
 
         String clientName = "Novacore";
 
-        RenderUtils.Render2D.drawCornerRound(position.x, position.y, size.x, size.y, 6, ColorUtils.rgba(20,20, 20, 200), RenderUtils.Render2D.Corner.ALL);
-        RenderUtils.Render2D.drawCornerRound(position.x, position.y, 95, size.y, 6, ColorUtils.rgba(16, 16, 16, 255), RenderUtils.Render2D.Corner.LEFT);
+        RenderUtils.Render2D.drawGradientRound(position.x, position.y, size.x, size.y, new Vector4f(7, 7, 7, 7),
+                ColorUtils.rgb(28,28,35),
+                ColorUtils.rgb(18,18,25),
+                ColorUtils.rgb(18,18,25),
+                ColorUtils.rgb(18,18,25));
+
+        RenderUtils.Render2D.drawRectVerticalW(position.x + 100, position.y, 1, size.y, ColorUtils.rgb(31,33,43), ColorUtils.rgb(34,36,46));
+        RenderUtils.Render2D.drawRectHorizontalW(position.x + 100, position.y + 30, size.x - 100, 1, ColorUtils.rgb(31,33,43), ColorUtils.rgb(34,36,46));
+
+        Fonts.sfMedium.drawText(matrixStack, category.name() + " / ", position.x + 115, position.y + 12.5f, -1, 10.5f);
+        Fonts.sfMedium.drawText(matrixStack," " + category.info, position.x + 115 + Fonts.sfMedium.getWidth(category.name() + " / ", 10.5f), position.y + 12.5f, ColorUtils.rgb(220, 220, 220), 10.5f);
+
         Fonts.interMedium.drawCenteredText(matrixStack, GradientUtil.gradient(clientName), position.x + 100 / 2f, position.y + 16.5f, 8);
-        
+
         Fonts.interMedium.drawText(matrixStack, "Main", position.x + 10, position.y + 40, ColorUtils.rgba(200, 200, 200, 150), 5);
         Fonts.interMedium.drawText(matrixStack, "Other", position.x + 10, position.y + 179, ColorUtils.rgba(200, 200, 200, 150), 5);
 
         renderCategories(matrixStack, mouseX, mouseY);
 
-        Stencil.initStencilToWrite();
-        RenderUtils.Render2D.drawRound(position.x + 100, position.y + 5, size.x - 105, size.y - 10, 5, -1);
-        Stencil.readStencilBuffer(1);
+        Scissor.push();
+        Scissor.setFromComponentCoordinates(position.x + 100, position.y + 35, size.x - 100, size.y - 35);
         drawElements(matrixStack, mouseX, mouseY);
-        Stencil.uninitStencilBuffer();
+        Scissor.unset();
+        Scissor.pop();
     }
 
 
@@ -119,7 +123,7 @@ public class Panel extends Screen implements IMinecraft {
                 Stencil.uninitStencilBuffer();
             }
 
-            Fonts.interMedium.drawText(matrixStack, type.name(), position.x + 25, position.y + 7 + offsetY, currentCategorySelected ? -1 : ColorUtils.rgba(200, 200, 200, 200), 7.5f);
+            Fonts.interMedium.drawText(matrixStack, type.name(), position.x + 25, position.y + 7 + offsetY, currentCategorySelected ? NovaCore.getInstance().getStyleManager().getCurrentStyle().getFirstColor().getRGB() : -1, 7.5f);
             Fonts.wexside.drawText(matrixStack, type.icon, position.x + 12.5f, position.y + 6.25f + offsetY, currentCategorySelected ? NovaCore.getInstance().getStyleManager().getCurrentStyle().getFirstColor().getRGB() : -1, 10.5f);
 
 
@@ -149,8 +153,8 @@ public class Panel extends Screen implements IMinecraft {
         float offset = scrollingOut;
         float sizePanel1 = 0;
         for (FunctionElement FunctionElement : first) {
-            FunctionElement.x = position.x + 120;
-            FunctionElement.y = position.y + 5 + offset;
+            FunctionElement.x = position.x + 115;
+            FunctionElement.y = position.y + 35 + offset;
             for (Element element : FunctionElement.element) {
                 if (element.setting.visible()) FunctionElement.height += element.height;
             }
@@ -162,8 +166,8 @@ public class Panel extends Screen implements IMinecraft {
         offset = scrollingOut;
         float sizePanel2 = 0;
         for (FunctionElement FunctionElement : second) {
-            FunctionElement.x = position.x + 275;
-            FunctionElement.y = position.y + 5 + offset;
+            FunctionElement.x = position.x + 255;
+            FunctionElement.y = position.y + 35 + offset;
             for (Element element : FunctionElement.element) {
                 if (element.setting.visible()) FunctionElement.height += element.height;
             }
@@ -172,7 +176,7 @@ public class Panel extends Screen implements IMinecraft {
             sizePanel2 += 27 + FunctionElement.getComponentHeight();
         }
 
-        float max = Math.max(sizePanel1 + 5, sizePanel2 + 5);
+        float max = Math.max(sizePanel1 + 35, sizePanel2 + 35);
         if (max < size.y) {
             scrolling = 0;
         } else {
@@ -188,11 +192,7 @@ public class Panel extends Screen implements IMinecraft {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            animation.setDirection(Direction.BACKWARDS);
-        }
-
-        if (animation.finished(Direction.BACKWARDS)) {
-            mc.displayGuiScreen(null);  // Закрыть экран только после завершения анимации
+            mc.displayGuiScreen(null);
         }
 
         for (FunctionElement FunctionElement : elements) {

@@ -15,6 +15,7 @@ import ru.novacore.events.Render3DPosedEvent;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
+import ru.novacore.functions.impl.combat.AttackAura;
 import ru.novacore.functions.settings.impl.ModeSetting;
 import ru.novacore.utils.animations.Animation;
 import ru.novacore.utils.animations.Direction;

@@ -26,7 +26,7 @@ public class ThemePanel {
             anim = MathUtil.lerp(anim,  NovaCore.getInstance().getStyleManager().getCurrentStyle() == style ? 1 : MathUtil.isHovered(mouseX,mouseY, x,y,width,height) ? 0.7f : 0, 5);
 
             RenderUtils.Render2D.drawVectorRound(x, y, width, height, new Vector4f(4, 4, 0, 0), ColorUtils.rgb(18, 18, 18));
-            RenderUtils.Render2D.drawGradientRound(x + width, y, width - 150, height, new Vector4f(0, 4, 0,4), this.style.getFirstColor().getRGB(), this.style.getFirstColor().getRGB(), this.style.getSecondColor().getRGB(), this.style.getSecondColor().getRGB());
+            RenderUtils.Render2D.drawGradientRound(x + width, y, width - 180, height, new Vector4f(0, 4, 0,4), this.style.getFirstColor().getRGB(), this.style.getFirstColor().getRGB(), this.style.getSecondColor().getRGB(), this.style.getSecondColor().getRGB());
             Fonts.interMedium.drawText(stack,this.style.getStyleName(), x + 5, y + 7, -1, 6.5f);
         }
     }

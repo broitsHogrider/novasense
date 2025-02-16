@@ -36,7 +36,7 @@ public class ThemeDrawing {
         scrollOffset = MathUtil.lerp(scrollOffset, targetScrollOffset, 10); // Плавная интерполяция
         openAnimation = MathUtil.lerp(openAnimation, colorOpen ? 1 : 0, 10);
 
-        float offsetY = y + 10 - scrollOffset;
+        float offsetY = y + 30 - scrollOffset;
 
         // Высота для всех панелей
         float totalContentHeight = 0;

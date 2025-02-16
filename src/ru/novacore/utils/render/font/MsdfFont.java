@@ -143,10 +143,14 @@ public final class MsdfFont {
 
             Map<Integer, Map<Integer, Float>> kernings = new HashMap<>();
             if (data.kernings() != null) {
+                Map<Integer, Map<Integer, Float>> finalKernings = kernings;
                 data.kernings().forEach((kerning) -> {
-                    Map<Integer, Float> map = kernings.computeIfAbsent(kerning.leftChar(), k -> new HashMap<>());
+                    Map<Integer, Float> map = finalKernings.computeIfAbsent(kerning.leftChar(), k -> new HashMap<>());
                     map.put(kerning.rightChar(), kerning.advance());
                 });
+            } else {
+                // Игнорируем кернинг, если данных нет
+                kernings = Map.of();
             }
 
             return new MsdfFont(this.name, texture, data.atlas(), data.metrics(), glyphs, kernings);

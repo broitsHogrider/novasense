@@ -12,6 +12,7 @@ import ru.novacore.NovaCore;
 import ru.novacore.events.EventDamageReceive;
 import ru.novacore.events.JumpEvent;
 import ru.novacore.functions.api.FunctionRegistry;
+import ru.novacore.functions.impl.combat.AttackAura;
 import ru.novacore.functions.impl.misc.AntiPush;
 import ru.novacore.functions.impl.render.SwingAnimation;
 import ru.novacore.utils.math.MathUtil;

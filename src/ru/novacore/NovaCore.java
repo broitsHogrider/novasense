@@ -54,7 +54,7 @@ public class NovaCore {
     public static UserData userData = new UserData("hogrider", 1);
     public boolean playerOnServer = false;
     public static final String CLIENT_NAME = "NovaCore 1.16.5";
-    public static final String BUILD_DATE = "#15022025";
+    public static final String BUILD_DATE = "#16022025";
 
 
     // Экземпляр Novacore
@@ -113,7 +113,6 @@ public class NovaCore {
 
             @Override
             public void onReady(IPCClient client) {
-                UserData userData = NovaCore.userData;
                 RichPresence.Builder builder = new RichPresence.Builder();
                 builder.setDetails("ROLE: User").setStartTimestamp(OffsetDateTime.now()).setLargeImage("avatar", "always on top");
                 client.sendRichPresence(builder.build());
@@ -184,6 +183,7 @@ public class NovaCore {
     public void onKeyPressed(int key) {
         if (functionRegistry.getSelfDestruct().unhooked) return;
         eventKey.setKey(key);
+
         eventBus.post(eventKey);
 
         macroManager.onKeyPressed(key);
@@ -191,8 +191,6 @@ public class NovaCore {
         if (key == GLFW.GLFW_KEY_RIGHT_SHIFT) {
             Minecraft.getInstance().displayGuiScreen(dropDown);
         }
-
-
     }
 
     public void shutDown() {

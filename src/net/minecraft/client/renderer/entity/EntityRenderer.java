@@ -19,6 +19,7 @@ import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.LightType;
+import ru.novacore.functions.impl.render.ESP;
 import net.optifine.reflect.Reflector;
 import net.optifine.reflect.ReflectorForge;
 import net.optifine.util.Either;

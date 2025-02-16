@@ -7,6 +7,7 @@ import ru.novacore.events.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
+import ru.novacore.functions.impl.combat.AttackAura;
 import ru.novacore.functions.settings.impl.BooleanSetting;
 import ru.novacore.functions.settings.impl.SliderSetting;
 import net.minecraft.client.settings.PointOfView;
