@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.Pair;
 import ru.novacore.NovaCore;
 import ru.novacore.events.AttackEvent;
 import ru.novacore.functions.api.FunctionRegistry;
-import ru.novacore.functions.impl.combat.AttackAura;
 import ru.novacore.functions.impl.player.NoInteract;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.block.*;

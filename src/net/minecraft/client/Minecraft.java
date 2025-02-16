@@ -24,7 +24,6 @@ import ru.novacore.NovaCore;
 import ru.novacore.events.EventChangeWorld;
 import ru.novacore.events.TickEvent;
 import ru.novacore.functions.api.FunctionRegistry;
-import ru.novacore.functions.impl.combat.AttackAura;
 import ru.novacore.functions.impl.misc.SelfDestruct;
 import ru.novacore.functions.impl.player.ItemCooldown;
 import ru.novacore.ui.mainmenu.MainScreen;

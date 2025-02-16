@@ -9,7 +9,6 @@ import ru.novacore.events.MovingEvent;
 import ru.novacore.events.PostMoveEvent;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.combat.Hitbox;
-import ru.novacore.functions.impl.combat.AttackAura;
 import ru.novacore.functions.impl.render.Trails;
 //.scripts.lua.classes.EntityClass;
 import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;

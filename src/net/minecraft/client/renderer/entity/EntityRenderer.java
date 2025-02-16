@@ -3,7 +3,6 @@ package net.minecraft.client.renderer.entity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import ru.novacore.NovaCore;
 import ru.novacore.functions.api.FunctionRegistry;
-import ru.novacore.functions.impl.render.ESP;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;

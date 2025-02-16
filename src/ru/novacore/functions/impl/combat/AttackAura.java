@@ -2,8 +2,10 @@ package ru.novacore.functions.impl.combat;
 
 import com.google.common.eventbus.Subscribe;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.item.UseAction;
 import net.minecraft.network.play.client.CEntityActionPacket;
 import net.minecraft.potion.Effects;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import ru.novacore.NovaCore;
 import ru.novacore.command.friends.FriendStorage;
@@ -51,13 +53,14 @@ import java.util.Comparator;
 import java.util.List;
 
 import static java.lang.Math.hypot;
-import static java.lang.Math.toDegrees;
+import static java.lang.Math.nextUp;
 import static net.minecraft.util.math.MathHelper.clamp;
 import static net.minecraft.util.math.MathHelper.wrapDegrees;
-
+// by lapycha and artem
 @FunctionInfo(name = "AttackAura", category = Category.Combat)
 public class AttackAura extends Function {
     @Getter
+    private final ModeSetting bypass = new ModeSetting("Обход Античита","ReallyWorld","ReallyWorld","LegendsGrief");
     private final ModeSetting type = new ModeSetting("Тип", "Плавная", "Плавная", "Резкая");
     private final SliderSetting attackRange = new SliderSetting("Дистанция аттаки", 3f, 3f, 6f, 0.1f);
     private final SliderSetting rotateRange = new SliderSetting("Дистанция наведение", 1.0f, 0.0f, 3.0f, 0.1f).setVisible(() -> type.is("Плавная"));
@@ -71,20 +74,23 @@ public class AttackAura extends Function {
             new BooleanSetting("Невидимки", true));
 
     @Getter
-    final ModeListSetting options = new ModeListSetting("Опции",
+    final ModeListSetting options = new ModeListSetting("Настройки",
             new BooleanSetting("Только криты", true),
             new BooleanSetting("Ломать щит", true),
             new BooleanSetting("Отжимать щит", true),
             new BooleanSetting("Синхронизировать атаку с ТПС", false),
             new BooleanSetting("Фокусировать одну цель", true),
             new BooleanSetting("Коррекция движения", true),
-            new BooleanSetting("Бить через стены", true));
+            new BooleanSetting("Бить через стены", true),
+            new BooleanSetting("Не бить когда ешь", true),
+            new BooleanSetting("Не бить с щитом", true));
+
     final ModeSetting correctionType = new ModeSetting("Тип коррекции", "Незаметный", "Незаметный", "Сфокусированный");
 
     final BooleanSetting forwardboolean = new BooleanSetting("Обгонять", true);
     final SliderSetting forward = new SliderSetting("Значение обгона", 0.0f, 0.0f, 3.0f, 0.1f).setVisible(() -> forwardboolean.get());
     final BooleanSetting smartCrits = new BooleanSetting("Умные криты", false).setVisible(() -> options.get(0).get());
-    final BooleanSetting rayTraceCheck = new BooleanSetting("Проверка на наведение", false).setVisible(() -> type.is("Плавная"));
+    final BooleanSetting rayTraceCheck = new BooleanSetting("Проверка на наведение", true).setVisible(() -> type.is("Плавная"));
     final BooleanSetting chekarmor = new BooleanSetting("Приоритет на элитры", true);
     final ModeSetting sprintSetting = new ModeSetting("Сброс спринта", "Легитный", "Легитный", "Пакетный");
 
@@ -105,7 +111,7 @@ public class AttackAura extends Function {
 
     public AttackAura(AutoPotion autoPotion) {
         this.autoPotion = autoPotion;
-        addSettings(type, attackRange,rotateRange,elytraRotateRange, targets, options, correctionType,sprintSetting, smartCrits, forward,chekarmor, rayTraceCheck, forwardboolean);
+        addSettings(bypass,type, attackRange,rotateRange,elytraRotateRange, targets, options, correctionType,sprintSetting, smartCrits, forward,chekarmor, rayTraceCheck, forwardboolean);
     }
 
     @Subscribe
@@ -121,31 +127,30 @@ public class AttackAura extends Function {
             updateTarget();
         }
 
-        if (target == null || autoPotion.isActive()) {
-            cpsLimit = System.currentTimeMillis();
-            reset();
-            return;
-        }
-        isRotated = false;
 
-        boolean elytraTarget = mc.player.isElytraFlying();
-        if (type.is("Резкая") && !elytraTarget) {
-            if (shouldAttack()) {
+        if (target != null && !(autoPotion.isState() && autoPotion.isActive())) {
+            isRotated = false;
+            if (shouldPlayerFalling() && (stopWatch.hasTimeElapsed())) {
                 updateAttack();
                 ticks = 2;
             }
-            if (ticks > 0) {
-                updateRotation(true,180.0f, 90.0f);
-                --ticks;
+            if (type.is("Резкая")) {
+                if (ticks > 0) {
+                    updateRotation(true, 180, 90);
+                    ticks--;
+                } else {
+                    reset();
+                }
             } else {
-                reset();
+                if (!isRotated) {
+                    updateRotation(false, 80, 35);
+                }
             }
-        }
-        if (type.is("Плавная") || elytraTarget) {
-            if (shouldAttack()) {
-                updateAttack();
-            }
-            updateRotation(false, 180.0f, 90.0f);
+
+        } else {
+            stopWatch.setLastMS(0);
+            reset();
+
         }
     }
 
@@ -247,8 +252,8 @@ public class AttackAura extends Function {
             vec3d = vec3d.add(targetMotion.normalize().scale(angleCorrection * 0.1));
         }
 
-        float yawToTarget = (float) wrapDegrees(toDegrees(Math.atan2(vec3d.z, vec3d.x)) - 90);
-        float pitchToTarget = (float) wrapDegrees(toDegrees(-Math.atan2(vec3d.y, hypot(vec3d.x, vec3d.z))));
+        float yawToTarget = (float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(vec3d.z, vec3d.x)) - 90);
+        float pitchToTarget = (float) (-Math.toDegrees(Math.atan2(vec3d.y, hypot(vec3d.x, vec3d.z))));
 
         float yawDelta = (wrapDegrees(yawToTarget - rotateVector.x));
         float pitchDelta = (wrapDegrees(pitchToTarget - rotateVector.y));
@@ -300,6 +305,7 @@ public class AttackAura extends Function {
         }
     }
 
+
     //РАДИАЦИЯ АПАСНА!!!!!
     @Subscribe
     public void onPacketEvent(EventPacket eventPacket) {
@@ -318,6 +324,13 @@ public class AttackAura extends Function {
             return;
         }
 
+        if (options.getValueByName("Не бить когда ешь").get() && mc.player.isHandActive() && mc.player.getHeldItemOffhand().getUseAction() == UseAction.EAT) {
+            return;
+        }
+        if (options.getValueByName("Не бить с щитом").get() && mc.player.isBlocking()) {
+            return;
+        }
+
         if (mc.player.isBlocking() && options.getValueByName("Отжимать щит").get()) {
             mc.playerController.onStoppedUsingItem(mc.player);
         }
@@ -333,19 +346,40 @@ public class AttackAura extends Function {
         if (sprintSetting.is("Легитный") && autoSprint.isState()) {
             autoSprint.setEmergencyStop(true);
         }
+      if (mc.player.isSprinting())
+          mc.player.setSprinting(false);
 
-        cpsLimit = System.currentTimeMillis() + 500;
+        if (bypass.get().equals("ReallyWorld")) {
+            stopWatch.setLastMS(500);
+            if(mc.player.isSprinting())
+                mc.player.setSprinting(false);
+
+        } else if (bypass.get().equals("LegendsGrief")) {
+            stopWatch.setLastMS(550L + (int) (Math.random() * 71));
+            if ((double) mc.timer.timerSpeed == 1.0) {
+                mc.timer.timerSpeed = 1.005F;
+                if(mc.player.isSprinting())
+                    mc.player.setSprinting(false);
+            }
+        }
+
         mc.playerController.attackEntity(mc.player, target);
         mc.player.swingArm(Hand.MAIN_HAND);
+
+        if (mc.player.isSprinting()) {
+            mc.player.setSprinting(false);
+        }
 
         if (target instanceof PlayerEntity player && options.getValueByName("Ломать щит").get()) {
             breakShieldPlayer(player);
         }
+
         if (sprinting) {
-            mc.player.setSprinting(true);
+            mc.player.setSprinting(false);
             mc.player.connection.sendPacket(new CEntityActionPacket(mc.player, CEntityActionPacket.Action.START_SPRINTING));
         }
     }
+
 
     private boolean shouldPlayerFalling() {
         boolean onSpace = smartCrits.get() && mc.player.isOnGround() && !mc.gameSettings.keyBindJump.isKeyDown();

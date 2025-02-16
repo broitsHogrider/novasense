@@ -2,46 +2,25 @@ package ru.novacore.functions.impl.render;
 
 import com.google.common.eventbus.Subscribe;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
-import net.optifine.shaders.Shaders;
-import org.lwjgl.opengl.GL11;
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventDisplay;
 import ru.novacore.events.EventUpdate;
 import ru.novacore.events.Render3DPosedEvent;
-import ru.novacore.events.WorldEvent;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
-import ru.novacore.functions.impl.combat.AttackAura;
 import ru.novacore.functions.settings.impl.ModeSetting;
 import ru.novacore.utils.animations.Animation;
 import ru.novacore.utils.animations.Direction;
 import ru.novacore.utils.animations.impl.DecelerateAnimation;
-import ru.novacore.utils.math.MathUtil;
-import ru.novacore.utils.projections.ProjectionUtil;
 import ru.novacore.utils.render.ColorUtils;
 import ru.novacore.utils.render.RenderUtils;
-
-import java.awt.*;
-
-import static com.mojang.blaze3d.platform.GlStateManager.GL_QUADS;
-import static com.mojang.blaze3d.systems.RenderSystem.depthMask;
-import static net.minecraft.client.renderer.vertex.DefaultVertexFormats.POSITION_COLOR_TEX;
 
 @FunctionInfo(name = "TargetESP", category = Category.Render)
 public class TargetESP extends Function {

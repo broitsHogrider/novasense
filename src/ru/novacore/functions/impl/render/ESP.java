@@ -55,11 +55,11 @@ import java.util.*;
 import static net.minecraft.client.renderer.WorldRenderer.frustum;
 import static org.lwjgl.opengl.GL11.glScalef;
 import static org.lwjgl.opengl.GL11.glTranslatef;
-
+// by lapycha and artem
 @FunctionInfo(name = "ESP", category = Category.Render)
 public class ESP extends Function {
     public ModeListSetting remove = new ModeListSetting("Включить", new BooleanSetting("Предметы", true), new BooleanSetting("Полоску хп", true), new BooleanSetting("Текст хп", true), new BooleanSetting("Зачарования", false), new BooleanSetting("Список эффектов", true),new BooleanSetting("Индикация Сфер",false),new BooleanSetting("Индикация Талисманов",false));
-    private final ModeSetting typeBox = new ModeSetting("Тип ", "Углы", "Боксы", "Углы");
+    private final ModeSetting typeBox = new ModeSetting("Тип ", "Углы",  "Углы");
     public ESP() {
         addSettings(remove,typeBox);
     }
@@ -120,13 +120,15 @@ public class ESP extends Function {
                 if (!typeBox.is("Углы")) {
                     RenderUtils.Render2D.drawBoxTest(position.x, position.y, position.z, position.w, 1, FriendStorage.isFriend(entity.getName().getString()) ? friendColors : colors);
                 }
-                if (!typeBox.is("Боксы")) {
+                {
                     double x = position.x;
                     double y = position.y;
                     double endX = position.z;
                     double endY = position.w;
                     int getColor = ColorUtils.getColor(90);
                     int outlineColor = ColorUtils.rgb(26,26,26);
+                    int getColorFriend = ColorUtils.rgba(102,255,0,255);
+                    int outlineColorFriend = ColorUtils.rgba(102,255,0,255);
 
                     double percentageX = 0.2;
                     double percentageY = 0.15;
@@ -154,6 +156,30 @@ public class ESP extends Function {
                     drawMcRect(x - 0.5, endY - calcSectY, x + 0.5, endY, getColor);
                     drawMcRect(endX - 0.5, y + 0.5, endX + 0.5, y + calcSectY, getColor);
                     drawMcRect(endX - 0.5, endY - calcSectY, endX + 0.5, endY, getColor);
+                    {
+                        if(FriendStorage.isFriend(entity.getName().getString()))
+                        {
+                            drawMcRect(x - 1, y - 1, x + calcSectX + 0.5, y + 1, outlineColorFriend);
+                            drawMcRect(endX - calcSectX - 0.5, y - 1, endX + 1, y + 1, outlineColorFriend);
+                            drawMcRect(x - 1, endY - 1, x + calcSectX + 0.5, endY + 1, outlineColorFriend);
+                            drawMcRect(endX - calcSectX - 0.5, endY - 1, endX + 1, endY + 1, outlineColorFriend);
+                            drawMcRect(x - 1, y + 0.5, x + 1, y + calcSectY + 1, outlineColorFriend);
+                            drawMcRect(x - 1, endY - calcSectY - 1, x + 1, endY + 0.5, outlineColorFriend);
+                            drawMcRect(endX - 1, y + 0.5, endX + 1, y + calcSectY + 1, outlineColorFriend);
+                            drawMcRect(endX - 1, endY - calcSectY - 1, endX + 1, endY + 0.5, outlineColorFriend);
+
+                            drawMcRect(x - 0.5, y - 0.5, x + calcSectX, y + 0.5, getColorFriend);
+                            drawMcRect(endX - calcSectX, y - 0.5, endX + 0.5, y + 0.5, getColorFriend);
+                            drawMcRect(x - 0.5, endY - 0.5, x + calcSectX, endY + 0.5, getColorFriend);
+                            drawMcRect(endX - calcSectX, endY - 0.5, endX + 0.5, endY + 0.5, getColorFriend);
+                            drawMcRect(x - 0.5, y + 0.5, x + 0.5, y + calcSectY, getColorFriend);
+                            drawMcRect(x - 0.5, endY - calcSectY, x + 0.5, endY, getColorFriend);
+                            drawMcRect(endX - 0.5, y + 0.5, endX + 0.5, y + calcSectY, getColorFriend);
+                            drawMcRect(endX - 0.5, endY - calcSectY, endX + 0.5, endY, getColorFriend);
+                        }
+                    }
+
+
                 }
 
                 float hpOffset = 3f;
@@ -200,12 +226,12 @@ public class ESP extends Function {
                 float width = position.z - position.x;
 
                 String hpText = (int) hp + "HP";
-                float hpWidth = Fonts.interMedium.getWidth(hpText, 5);
+                float hpWidth = Fonts.sfbold.getWidth(hpText, 5);
 
                 float hpPercent = MathHelper.clamp(hp / maxHp, 0, 1);
                 float hpPosY = position.y + (position.w - position.y) * (1 - hpPercent);
                 if (remove.getValueByName("Текст хп").get()) {
-                    Fonts.interMedium.drawText(e.getMatrixStack(), hpText, position.x - hpWidth - 6, hpPosY, -1, 5, 0.05f);
+                    Fonts.sfbold.drawText(e.getMatrixStack(), hpText, position.x - hpWidth - 6, hpPosY, -1, 5, 0.05f);
                 }
                 String hptext1 =  (int) hp + "";
                 String friendPrefix = FriendStorage.isFriend(entity.getName().getString()) ? TextFormatting.GREEN + "[F] " : "";
@@ -271,7 +297,7 @@ public class ESP extends Function {
                             } else if (itemName.contains("Астр")) {
                                 itemName = "[ASTREYA ";
                             }
-                            Fonts.interMedium.drawText(e.getMatrixStack(), itemName + nameS, (float) position.x - 15, position.y - 55, ColorUtils.rgb(255, 16, 16), 10.5f, 0.0001f);
+                            Fonts.sfMedium.drawText(e.getMatrixStack(), itemName + nameS, (float) position.x - 15, position.y - 55, ColorUtils.rgb(255, 16, 16), 10.5f, 0.0001f);
                         }
                     }
                 }
@@ -326,7 +352,7 @@ public class ESP extends Function {
                             } else if (itemName.contains("Талисман Ехидны")) {
                                 itemName = "[EXIDNA ";
                             }
-                            Fonts.interMedium.drawText(e.getMatrixStack(), itemName + nameS, (float) position.x - 15, position.y - 55, ColorUtils.rgb(255, 16, 16), 10.5f, 0.0001f);
+                            Fonts.sfMedium.drawText(e.getMatrixStack(), itemName + nameS, (float) position.x - 15, position.y - 55, ColorUtils.rgb(255, 16, 16), 10.5f, 0.0001f);
                         }
                     }
                 }GL11.glPopMatrix();
@@ -345,7 +371,7 @@ public class ESP extends Function {
 //                    ITextComponent text = entity.getDisplayName();
 //                    TextComponent name = (TextComponent)text;
 //                    name.append(new StringTextComponent(""));
-//                    float length = Fonts.interMedium.getWidth(name,11);
+//                    float length = Fonts.sfbold.getWidth(name,11);
 
 
                     float width = position.z - position.x;
@@ -357,7 +383,7 @@ public class ESP extends Function {
                     glCenteredScale(position.x + width / 2f - length / 2f, position.y - 7, length, 10, 0.5f);
                     RenderUtils.Render2D.drawRound(position.x - 5 + width / 2f - length / 2f, position.y - 16, length + 10, 16, 2, ColorUtils.rgba(10, 10, 10, 150));
                     mc.fontRenderer.func_243246_a(e.getMatrixStack(), tag, position.x + width/2.0f - length / 2f, position.y - 12, -1);
-                    //Fonts.interMedium.drawText(e.getMatrixStack(),tag,position.x + width/2.0f - length / 2f, position.y - 14,13,255);
+                    //Fonts.sfui.drawText(e.getMatrixStack(),tag,position.x + width/2.0f - length / 2f, position.y - 14,13,255);
                     GL11.glPopMatrix();
                 }
             }
@@ -406,7 +432,7 @@ public class ESP extends Function {
 
             String text = I18n.format(ef.getEffectName()) + ampStr + " - " + EffectUtils.getPotionDurationString(ef, 1);
 
-            Fonts.interMedium.drawText(matrixStack, text, posX + 10, posY, -1, 5, 0.05f);
+            Fonts.sfbold.drawText(matrixStack, text, posX + 10, posY, -1, 5, 0.05f);
 
             Effect effect = ef.getPotion();
             PotionSpriteUploader potionspriteuploader = Minecraft.getInstance().getPotionSpriteUploader();
@@ -414,7 +440,7 @@ public class ESP extends Function {
             Minecraft.getInstance().getTextureManager().bindTexture(textureatlassprite.getAtlasTexture().getTextureLocation());
             DisplayEffectsScreen.blit(matrixStack, (int) (posX), (int) (posY - 1), 11, 10, 10, textureatlassprite);
 
-            posY += Fonts.interMedium.getHeight(7) + 3.5f;
+            posY += Fonts.sfbold.getHeight(7) + 3.5f;
         }
     }
 
@@ -422,7 +448,7 @@ public class ESP extends Function {
         int size = 8;
         int padding = 6;
 
-        float fontHeight = Fonts.interMedium.getHeight(6);
+        float fontHeight = Fonts.sfbold.getHeight(6);
 
         List<ItemStack> items = new ArrayList<>();
 
@@ -465,7 +491,7 @@ public class ESP extends Function {
 
                     String enchText = iformattabletextcomponent.getString().substring(0, 2) + level;
 
-                    Fonts.interMedium.drawText(matrixStack, enchText, posX, ePosY, -1, 6, 0.05f);
+                    Fonts.sfbold.drawText(matrixStack, enchText, posX, ePosY, -1, 6, 0.05f);
 
                     ePosY -= (int) fontHeight;
                 }

@@ -32,7 +32,6 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import ru.novacore.NovaCore;
 import ru.novacore.functions.api.FunctionRegistry;
-import ru.novacore.functions.impl.combat.AttackAura;
 import ru.novacore.functions.impl.movement.ElytraBoost;
 
 public class FireworkRocketEntity extends ProjectileEntity implements IRendersAsItem
