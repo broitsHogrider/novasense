@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="ViaVersion-4.9.2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/ViaRewind-2.0.3-SNAPSHOT.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/ViaVersion-4.9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/ViaVersion-4.9.2 (1).jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/ViaVersion-4.9.3-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

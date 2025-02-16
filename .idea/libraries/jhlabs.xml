@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="jhlabs">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/jhlabs.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

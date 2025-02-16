@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Animations-4.0 (2)">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/Animations-4.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/authlib-2.1.28.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/brigadier-1.0.17.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/ca-fixer-1.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

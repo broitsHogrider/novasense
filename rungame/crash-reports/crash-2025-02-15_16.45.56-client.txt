@@ -1,0 +1,62 @@
+---- Minecraft Crash Report ----
+// You're mean.
+
+Time: 15.02.2025, 16:45
+Description: Initializing game
+
+java.lang.NullPointerException: Cannot invoke "java.util.List.forEach(java.util.function.Consumer)" because the return value of "ru.novacore.utils.render.font.FontData.kernings()" is null
+	at ru.novacore.utils.render.font.MsdfFont$Builder.build(MsdfFont.java:147)
+	at ru.novacore.utils.render.font.Font.<init>(Font.java:29)
+	at ru.novacore.utils.render.font.Fonts.register(Fonts.java:8)
+	at net.minecraft.client.Minecraft.<init>(Minecraft.java:465)
+	at net.minecraft.client.main.Main.main(Main.java:159)
+	at Start.main(Start.java:13)
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Render thread
+Stacktrace:
+	at ru.novacore.utils.render.font.MsdfFont$Builder.build(MsdfFont.java:147)
+	at ru.novacore.utils.render.font.Font.<init>(Font.java:29)
+	at ru.novacore.utils.render.font.Fonts.register(Fonts.java:8)
+	at net.minecraft.client.Minecraft.<init>(Minecraft.java:465)
+
+-- Initialization --
+Details:
+Stacktrace:
+	at net.minecraft.client.main.Main.main(Main.java:159)
+	at Start.main(Start.java:13)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.16.5
+	Minecraft Version ID: 5e5a85d273fa4978916d633c941b950f
+	Operating System: Windows 10 (amd64) version 10.0
+	Java Version: 17.0.10, Oracle Corporation
+	Java VM Version: Java HotSpot(TM) 64-Bit Server VM (mixed mode, sharing), Oracle Corporation
+	Memory: 589948648 bytes (562 MB) / 2122317824 bytes (2024 MB) up to 2145386496 bytes (2046 MB)
+	CPUs: 8
+	JVM Flags: 0 total; 
+	Launched Version: mcp
+	Backend library: LWJGL version 3.2.2 build 10
+	Backend API: Radeon RX 470 Series GL version 4.6.0 Compatibility Profile Context 23.11.1.231017, ATI Technologies Inc.
+	GL Caps: Using framebuffer using OpenGL 3.0
+	Using VBOs: Yes
+	Is Modded: Very likely; Jar signature invalidated
+	Type: Client (map_client.txt)
+	CPU: 8x Intel(R) Xeon(R) CPU X3450 @ 2.67GHz
+	OptiFine Version: OptiFine_1.16.5_HD_U_G8
+	OptiFine Build: ~~NULL~~
+	Render Distance Chunks: 8
+	Mipmaps: 4
+	Anisotropic Filtering: 1
+	Antialiasing: 0
+	Multitexture: false
+	Shaders: null
+	OpenGlVersion: 4.6.0 Compatibility Profile Context 23.11.1.231017
+	OpenGlRenderer: Radeon RX 470 Series
+	OpenGlVendor: ATI Technologies Inc.
+	CpuCount: 8

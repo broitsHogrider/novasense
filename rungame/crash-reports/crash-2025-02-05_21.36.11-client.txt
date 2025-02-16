@@ -1,0 +1,79 @@
+---- Minecraft Crash Report ----
+// Uh... Did I do that?
+
+Time: 05.02.2025, 21:36
+Description: Unexpected error
+
+java.lang.NoClassDefFoundError: via/fixes/AttackOrder
+	at net.minecraft.client.Minecraft.clickMouse(Minecraft.java:1378)
+	at net.minecraft.client.Minecraft.processKeyBinds(Minecraft.java:1736)
+	at net.minecraft.client.Minecraft.runTick(Minecraft.java:1537)
+	at net.minecraft.client.Minecraft.runGameLoop(Minecraft.java:956)
+	at net.minecraft.client.Minecraft.run(Minecraft.java:570)
+	at net.minecraft.client.main.Main.main(Main.java:194)
+	at Start.main(Start.java:13)
+Caused by: java.lang.ClassNotFoundException: via.fixes.AttackOrder
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641)
+	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:520)
+	... 7 more
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Render thread
+Stacktrace:
+	at net.minecraft.client.Minecraft.clickMouse(Minecraft.java:1378)
+	at net.minecraft.client.Minecraft.processKeyBinds(Minecraft.java:1736)
+
+-- Affected level --
+Details:
+	All players: 25 total; [ClientPlayerEntity['qfqwfs'/1961786, l='ClientLevel', x=7.73, y=88.25, z=-27.53], RemoteClientPlayerEntity['Dima210510'/1951112, l='ClientLevel', x=15.01, y=88.00, z=-28.07], RemoteClientPlayerEntity['Grifonya_luti'/1605045, l='ClientLevel', x=12.63, y=88.00, z=-26.41], RemoteClientPlayerEntity['momo0211c'/1934842, l='ClientLevel', x=16.65, y=88.00, z=-35.26], RemoteClientPlayerEntity['K1qu'/1417533, l='ClientLevel', x=-10.50, y=86.00, z=-31.58], RemoteClientPlayerEntity['orange_yoshi'/1130605, l='ClientLevel', x=5.38, y=86.00, z=-47.63], RemoteClientPlayerEntity['ril_223'/1685079, l='ClientLevel', x=-14.23, y=87.00, z=-40.57], RemoteClientPlayerEntity['CIT-a00f837e2065'/169, l='ClientLevel', x=20.49, y=88.00, z=-35.47], RemoteClientPlayerEntity['Chillotroper'/1660515, l='ClientLevel', x=21.59, y=86.50, z=-44.66], RemoteClientPlayerEntity['kaniks111'/1469891, l='ClientLevel', x=55.88, y=86.00, z=-48.54], RemoteClientPlayerEntity['FJoooK'/1634371, l='ClientLevel', x=-21.12, y=86.00, z=-43.70], RemoteClientPlayerEntity['ril_228'/1648737, l='ClientLevel', x=-18.30, y=91.00, z=-9.49], RemoteClientPlayerEntity['42111'/1957720, l='ClientLevel', x=17.42, y=87.00, z=-53.48], RemoteClientPlayerEntity['zigjf'/1805270, l='ClientLevel', x=54.01, y=86.00, z=-32.27], RemoteClientPlayerEntity['tuturutu'/1931594, l='ClientLevel', x=47.76, y=86.00, z=-27.29], RemoteClientPlayerEntity['polocopda'/1962683, l='ClientLevel', x=15.80, y=87.00, z=-54.40], RemoteClientPlayerEntity['arvik'/1942747, l='ClientLevel', x=-46.14, y=86.00, z=-31.42], RemoteClientPlayerEntity['Danyaw1n'/1938000, l='ClientLevel', x=13.54, y=88.00, z=-30.80], RemoteClientPlayerEntity['Svartyx'/1960142, l='ClientLevel', x=17.86, y=88.00, z=-31.68], RemoteClientPlayerEntity['CIT-d06a68ee8551'/173, l='ClientLevel', x=15.50, y=87.00, z=-79.50], RemoteClientPlayerEntity['true190'/1959785, l='ClientLevel', x=-48.44, y=86.92, z=-59.42], RemoteClientPlayerEntity['Seyuriti'/1920200, l='ClientLevel', x=15.50, y=88.00, z=-26.50], RemoteClientPlayerEntity['RO3O4ka_'/1960066, l='ClientLevel', x=60.52, y=223.00, z=-20.27], RemoteClientPlayerEntity['rohvsaqsxzzx'/1941409, l='ClientLevel', x=15.77, y=87.00, z=-80.78], RemoteClientPlayerEntity['korzin_sin_shlyu'/1940732, l='ClientLevel', x=61.17, y=223.00, z=-18.18]]
+	Chunk stats: Client Chunk Cache: 529, 361
+	Level dimension: minecraft:spawn_world
+	Level spawn location: World: (-1,88,-94), Chunk: (at 15,5,2 in -1,-6; contains blocks -16,0,-96 to -1,255,-81), Region: (-1,-1; contains chunks -32,-32 to -1,-1, blocks -512,0,-512 to -1,255,-1)
+	Level time: 37964 game time, 129000 day time
+	Server brand: §b§lHolyWorld§f (Proxy 5-1)
+	Server type: Non-integrated multiplayer server
+Stacktrace:
+	at net.minecraft.client.world.ClientWorld.fillCrashReport(ClientWorld.java:530)
+	at net.minecraft.client.Minecraft.addGraphicsAndWorldToCrashReport(Minecraft.java:2296)
+	at net.minecraft.client.Minecraft.run(Minecraft.java:592)
+	at net.minecraft.client.main.Main.main(Main.java:194)
+	at Start.main(Start.java:13)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.16.5
+	Minecraft Version ID: c137f09e55624329a3fde9a15d4ee40a
+	Operating System: Windows 11 (amd64) version 10.0
+	Java Version: 17.0.11, Oracle Corporation
+	Java VM Version: Java HotSpot(TM) 64-Bit Server VM (mixed mode, sharing), Oracle Corporation
+	Memory: 203864048 bytes (194 MB) / 838860800 bytes (800 MB) up to 4261412864 bytes (4064 MB)
+	CPUs: 12
+	JVM Flags: 0 total; 
+	Launched Version: mcp
+	Backend library: LWJGL version 3.2.2 build 10
+	Backend API: NVIDIA GeForce RTX 2060 SUPER/PCIe/SSE2 GL version 4.6.0 NVIDIA 572.16, NVIDIA Corporation
+	GL Caps: Using framebuffer using OpenGL 3.0
+	Using VBOs: Yes
+	Is Modded: Very likely; Jar signature invalidated
+	Type: Client (map_client.txt)
+	Graphics mode: fancy
+	Resource Packs: 
+	Current Language: English (US)
+	CPU: 12x 11th Gen Intel(R) Core(TM) i5-11400F @ 2.60GHz
+	OptiFine Version: OptiFine_1.16.5_HD_U_G8
+	OptiFine Build: ~~NULL~~
+	Render Distance Chunks: 8
+	Mipmaps: 4
+	Anisotropic Filtering: 1
+	Antialiasing: 0
+	Multitexture: false
+	Shaders: null
+	OpenGlVersion: 4.6.0 NVIDIA 572.16
+	OpenGlRenderer: NVIDIA GeForce RTX 2060 SUPER/PCIe/SSE2
+	OpenGlVendor: NVIDIA Corporation
+	CpuCount: 12

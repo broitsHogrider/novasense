@@ -1,0 +1,68 @@
+---- Minecraft Crash Report ----
+// Hi. I'm Minecraft, and I'm a crashaholic.
+
+Time: 15.02.2025, 20:49
+Description: Initializing game
+
+java.lang.NullPointerException: Initializing game
+	at java.base/java.util.Objects.requireNonNull(Objects.java:208)
+	at ru.novacore.utils.font.common.AbstractFont.getFont(AbstractFont.java:33)
+	at ru.novacore.utils.font.styled.StyledFont.<init>(StyledFont.java:32)
+	at ru.novacore.utils.font.FontManager.init(FontManager.java:29)
+	at ru.novacore.NovaCore.clientLoad(NovaCore.java:153)
+	at ru.novacore.NovaCore.<init>(NovaCore.java:97)
+	at net.minecraft.client.Minecraft.<init>(Minecraft.java:430)
+	at net.minecraft.client.main.Main.main(Main.java:159)
+	at Start.main(Start.java:13)
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Render thread
+Stacktrace:
+	at java.base/java.util.Objects.requireNonNull(Objects.java:208)
+	at ru.novacore.utils.font.common.AbstractFont.getFont(AbstractFont.java:33)
+	at ru.novacore.utils.font.styled.StyledFont.<init>(StyledFont.java:32)
+	at ru.novacore.utils.font.FontManager.init(FontManager.java:29)
+	at ru.novacore.NovaCore.clientLoad(NovaCore.java:153)
+	at ru.novacore.NovaCore.<init>(NovaCore.java:97)
+	at net.minecraft.client.Minecraft.<init>(Minecraft.java:430)
+
+-- Initialization --
+Details:
+Stacktrace:
+	at net.minecraft.client.main.Main.main(Main.java:159)
+	at Start.main(Start.java:13)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.16.5
+	Minecraft Version ID: 8672b630dac3470a96df754ba6d9f429
+	Operating System: Windows 10 (amd64) version 10.0
+	Java Version: 17.0.10, Oracle Corporation
+	Java VM Version: Java HotSpot(TM) 64-Bit Server VM (mixed mode, sharing), Oracle Corporation
+	Memory: 164337720 bytes (156 MB) / 301989888 bytes (288 MB) up to 2145386496 bytes (2046 MB)
+	CPUs: 8
+	JVM Flags: 0 total; 
+	Launched Version: mcp
+	Backend library: LWJGL version 3.2.2 build 10
+	Backend API: Radeon RX 470 Series GL version 4.6.0 Compatibility Profile Context 23.11.1.231017, ATI Technologies Inc.
+	GL Caps: Using framebuffer using OpenGL 3.0
+	Using VBOs: Yes
+	Is Modded: Very likely; Jar signature invalidated
+	Type: Client (map_client.txt)
+	CPU: 8x Intel(R) Xeon(R) CPU X3450 @ 2.67GHz
+	OptiFine Version: OptiFine_1.16.5_HD_U_G8
+	OptiFine Build: ~~NULL~~
+	Render Distance Chunks: 8
+	Mipmaps: 4
+	Anisotropic Filtering: 1
+	Antialiasing: 0
+	Multitexture: false
+	Shaders: null
+	OpenGlVersion: 4.6.0 Compatibility Profile Context 23.11.1.231017
+	OpenGlRenderer: Radeon RX 470 Series
+	OpenGlVendor: ATI Technologies Inc.
+	CpuCount: 8

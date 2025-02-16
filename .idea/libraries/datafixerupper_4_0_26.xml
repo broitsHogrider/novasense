@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="datafixerupper-4.0.26">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/datafixerupper-4.0.26.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/fastutil-8.2.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
