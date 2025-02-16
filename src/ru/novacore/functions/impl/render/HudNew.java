@@ -190,7 +190,7 @@ public class HudNew extends Function {
     float animateW = 0, animateH = 0;
     private void onKeyBindsRenderer(MatrixStack matrixStack) {
         float posX = keybinds.getX(), posY = keybinds.getY(), offset = 11;
-        float width = Math.max(maxWid, 80), height = activeHotKeys * offset;
+        float width = Math.max(maxWid, 85), height = activeHotKeys * offset;
 
         animateW = MathUtil.lerp(animateW, width, 15);
         animateH = MathUtil.lerp(animateH, height, 15);
@@ -227,7 +227,7 @@ public class HudNew extends Function {
     float maxWidth;
     private void onStaffListRenderer(MatrixStack matrixStack) {
         float posX = staffOnlineDraggable.getX(), posY = staffOnlineDraggable.getY(), offset = 11;
-        float width = Math.max(maxWidth, 80), height = activeStaffs * offset;
+        float width = Math.max(maxWidth, 85), height = activeStaffs * offset;
         slAnimateWidth = MathUtil.lerp(slAnimateWidth, width, 15);
         slAnimateHeight = MathUtil.lerp(slAnimateHeight, height, 15);
 
@@ -290,7 +290,7 @@ public class HudNew extends Function {
     private void onPotionRenderer(MatrixStack matrixStack) {
         float posX = activePotionsDraggable.getX(), posY = activePotionsDraggable.getY(), offset = 11;
 
-        float width = Math.max(mWidth, 80), height = activePotions * offset;
+        float width = Math.max(mWidth, 85), height = activePotions * offset;
 
         potWidthAnim = MathUtil.lerp(potWidthAnim, width, 15);
         potHeigthAnim = MathUtil.lerp(potHeigthAnim, height, 15);
@@ -412,7 +412,10 @@ public class HudNew extends Function {
         sizeAnimation(x + (width / 2), y + (height / 2), targetHudAnimation.getOutput());
         RenderUtils.Render2D.drawShadow(x, y, width, height, 8, ColorUtils.getColor(0), ColorUtils.getColor(90), ColorUtils.getColor(180), ColorUtils.getColor(270));
         RenderUtils.Render2D.drawRound(x, y, width, height, 5, ColorUtils.rgb(25, 25, 25));
-        if (entity instanceof PlayerEntity) RenderUtils.Render2D.drawRoundFace(x + 4.5f, y + 4.5f,28, 28, 5, 1, (AbstractClientPlayerEntity) entity);
+        if (entity instanceof PlayerEntity)
+            RenderUtils.Render2D.drawRoundFace(x + 4.5f, y + 4.5f,28, 28, 5, 1, (AbstractClientPlayerEntity) entity);
+        else
+            RenderUtils.Render2D.drawRound(x + 4.5f, y + 4.5f,28, 28, 5, -1);
         RenderUtils.Render2D.drawGradientRound(x + 34.5F, y + 25.5f, (width - 40), 6, new Vector4f(3, 3, 3, 3), ColorUtils.rgb(14, 14, 14), ColorUtils.rgb(14, 14, 14), ColorUtils.rgb(14, 14, 14), ColorUtils.rgb(14, 14, 14));
         RenderUtils.Render2D.drawGradientRound(x + 34.5F, y + 25.5f, (width - 40) * hpAnim, 6, new Vector4f(3, 3, 3, 3), styleManager.getCurrentStyle().getFirstColor().getRGB(), styleManager.getCurrentStyle().getFirstColor().getRGB(), styleManager.getCurrentStyle().getSecondColor().getRGB(), styleManager.getCurrentStyle().getSecondColor().getRGB());
         RenderUtils.Render2D.drawGradientRound(x + 34.5F, y + 25.5f, (width - 40) * absorptionAnimation, 6, new Vector4f(3, 3, 3, 3), ColorUtils.rgba(255, 200, 50, 255), ColorUtils.rgba(255, 200, 50, 255), ColorUtils.rgba(255, 150, 0, 255), ColorUtils.rgba(255, 150, 0, 255));
