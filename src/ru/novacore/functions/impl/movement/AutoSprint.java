@@ -3,6 +3,7 @@ package ru.novacore.functions.impl.movement;
 import com.google.common.eventbus.Subscribe;
 import lombok.Setter;
 import lombok.experimental.NonFinal;
+import net.minecraft.item.UseAction;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.Effects;
 import ru.novacore.events.EventUpdate;
@@ -12,7 +13,7 @@ import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
 import ru.novacore.functions.settings.impl.BooleanSetting;
 
-@FunctionInfo(name = "Sprint", category = Category.Movement)
+@FunctionInfo(name = "AutoSprint", category = Category.Movement)
 public class AutoSprint extends Function {
     @Setter
     @NonFinal
@@ -30,11 +31,15 @@ public class AutoSprint extends Function {
     public void onUpdate(EventUpdate event) {
         boolean canSprint = canStartSprinting();
 
-        if (canSprint && !mc.player.collidedHorizontally) {
+        if (canSprint && !mc.player.collidedHorizontally &&
+                !mc.gameSettings.keyBindSneak.isKeyDown() &&
+                !mc.gameSettings.keyBindInventory.isKeyDown() &&
+                mc.player.getActiveItemStack().getUseAction() != UseAction.EAT) {
+
             if (!mc.player.isSprinting()) {
                 mc.player.setSprinting(true);
             }
-        } else if (!canSprint || emergencyStop) {
+        } else {
             if (mc.player.isSprinting()) {
                 mc.player.setSprinting(false);
             }
@@ -43,9 +48,14 @@ public class AutoSprint extends Function {
         emergencyStop = false;
     }
 
+    @Override
+    public void onDisable() {
+        mc.player.setSprinting(false);
+        super.onDisable();
+    }
+
     private boolean canStartSprinting() {
         return (mc.player.moveForward > 0 || mc.player.isSwimming()) &&
                 (ignoreBadEffects.get() || !mc.player.isPotionActive(Effects.BLINDNESS)) && mc.player.getFoodStats().getFoodLevel() > 6;
     }
-
 }

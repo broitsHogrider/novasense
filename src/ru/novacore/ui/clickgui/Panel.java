@@ -25,6 +25,7 @@ import ru.novacore.utils.render.*;
 import ru.novacore.utils.render.font.Fonts;
 import ru.novacore.utils.text.GradientUtil;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -95,7 +96,7 @@ public class Panel extends Screen implements IMinecraft {
 
         Fonts.interMedium.drawCenteredText(matrixStack, GradientUtil.gradient(clientName), position.x + 100 / 2f, position.y + 16.5f, 8);
 
-        Fonts.interMedium.drawText(matrixStack, "Main", position.x + 10, position.y + 40, ColorUtils.rgba(200, 200, 200, 150), 5);
+        Fonts.interMedium.drawText(matrixStack, "Main", position.x + 10, position.y + 40, Color.WHITE.getRGB(), 5);
         Fonts.interMedium.drawText(matrixStack, "Other", position.x + 10, position.y + 179, ColorUtils.rgba(200, 200, 200, 150), 5);
 
         renderCategories(matrixStack, mouseX, mouseY);

@@ -42,44 +42,53 @@ public class MultiBoxElement extends Element {
         animation.setEndPoint(13 * list.size());
         animation.setDirection(open ? Direction.FORWARDS : Direction.BACKWARDS);
         setHeight((float) (animation.getOutput() + (open ? 29.5f : 25)));
+        int selectedCount = 0;
+        for (BooleanSetting setting : list) {
+            if (setting.get()) {
+                selectedCount++;
+            }
+        }
 
-        //DisplayUtils.drawRoundedRect(x + 5, y + 6, width - 10, 13, 5.5f, ColorUtils.rgba(20, 20, 20, 100), open ? DisplayUtils.Corner.TOP : DisplayUtils.Corner.ALL);
-        RenderUtils.Render2D.drawRound(x + 5, y + 6, width - 10, open ? (list.size() * 13 + 17.5f) : 13, 5.5f, ColorUtils.rgba(20, 20, 20, 100));
+        Fonts.interMedium.drawText(matrixStack, set.getName(), x + 5, y + 12.5f, -1, 6);
+
+        float rectWidth = Math.max(40, width / 2f);
+        RenderUtils.Render2D.drawRound(x + width - rectWidth - 5, y + 10, rectWidth, open ? (list.size() * 13 + 17.5f) : 13, 4, ColorUtils.rgb(30, 30, 30));
+
+        Fonts.interMedium.drawText(matrixStack,"Selected " + selectedCount + "/" + list.size(), x + width - rectWidth - 2.5f, y + 13.5f, ColorUtils.rgb(220, 220, 220), 6.5f);
 
         int i = 0;
         int offset = 0;
         if (open) {
+            RenderUtils.Render2D.drawRectHorizontalW(x + width - rectWidth - 5, y + 10 + 14, rectWidth, 1, ColorUtils.rgb(36, 36, 36), ColorUtils.rgb(39, 39, 39));
             for (BooleanSetting mode : list) {
                 offset += 13;
                 Scissor.push();
-                Scissor.setFromComponentCoordinates(x + 9, y + 14.5f + (float) offset, width - 10, 10);
+                Scissor.setFromComponentCoordinates(x + width - rectWidth - 5, y + 14.5f + (float) offset, rectWidth, 10);
                 boolean hover = MathUtil.isHovered(mouseX, mouseY, x + 9, y + 14.5f + offset, width, 10);
                 anim.put(mode, MathUtil.lerp(anim.get(mode), hover ? 2 : 0, 10));
-                Fonts.interMedium.drawText(matrixStack, mode.getName(), x + 9 + anim.get(mode), y + 14.5f + (float) offset, mode.get() ? -1 : ColorUtils.rgba(200, 200, 200, 200), 6);
+                Fonts.interMedium.drawText(matrixStack, mode.getName(), x + width - rectWidth - 2.5f + anim.get(mode), y + 14.5f + (float) offset, mode.get() ? -1 : ColorUtils.rgba(200, 200, 200, 200), 6);
                 Scissor.unset();
                 Scissor.pop();
                 i++;
             }
         }
 
-        Fonts.interMedium.drawCenteredText(matrixStack, GradientUtil.gradient(set.getName()), x + width / 2f, y + 10, 6);
     }
 
     @Override
     public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
-        if (MathUtil.isHovered(mouseX, mouseY, x + 5, y + 6, width - 10, 13) && mouseButton != 2) open = !open;
+        float off = 3;
+        off += Fonts.interMedium.getHeight(5) / 2f + 2;
+        float rectWidth = Math.max(40, width / 2f);
+        if (MathUtil.isHovered(mouseX, mouseY, x + width - rectWidth - 5, y + off, 40, 20 - 5)) {
+            open = !open;
+        }
 
-        int i = 0;
-        int offset = 0;
-        if (open) {
-            for (BooleanSetting ignored : set.get()) {
-                offset += 13;
-                if (MathUtil.isHovered(mouseX, mouseY, x + 9, y + 14.0f + offset, width - 10, 13) && mouseButton != 2) {
-                    System.out.println("Клик по элементу: " + ignored.getName());
-                    ignored.set(!ignored.get());
-                }
-                i++;
-            }
+        if (!open) return;
+        int i = 1;
+        for (BooleanSetting s : set.get()) {
+            if (MathUtil.isHovered(mouseX, mouseY, x, y + off + 20F + i, width, 8)) s.set(!s.get());
+            i += 9;
         }
     }
 

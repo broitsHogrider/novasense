@@ -2,6 +2,9 @@ package ru.novacore.functions.impl.combat;
 
 import com.google.common.eventbus.Subscribe;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
+import net.minecraft.entity.monster.PhantomEntity;
+import net.minecraft.entity.monster.PillagerEntity;
 import net.minecraft.item.UseAction;
 import net.minecraft.network.play.client.CEntityActionPacket;
 import net.minecraft.potion.Effects;
@@ -21,6 +24,7 @@ import ru.novacore.functions.settings.impl.BooleanSetting;
 import ru.novacore.functions.settings.impl.ModeListSetting;
 import ru.novacore.functions.settings.impl.ModeSetting;
 import ru.novacore.functions.settings.impl.SliderSetting;
+import ru.novacore.utils.client.ClientUtil;
 import ru.novacore.utils.math.MathUtil;
 import ru.novacore.utils.math.SensUtils;
 import ru.novacore.utils.math.StopWatch;
@@ -78,8 +82,8 @@ public class AttackAura extends Function {
             new BooleanSetting("Только криты", true),
             new BooleanSetting("Ломать щит", true),
             new BooleanSetting("Отжимать щит", true),
-            new BooleanSetting("Синхронизировать атаку с ТПС", false),
-            new BooleanSetting("Фокусировать одну цель", true),
+            new BooleanSetting("Учитовать ТПС", false),
+            new BooleanSetting("Статичная цель", true),
             new BooleanSetting("Коррекция движения", true),
             new BooleanSetting("Бить через стены", true),
             new BooleanSetting("Не бить когда ешь", true),
@@ -92,7 +96,7 @@ public class AttackAura extends Function {
     final BooleanSetting smartCrits = new BooleanSetting("Умные криты", false).setVisible(() -> options.get(0).get());
     final BooleanSetting rayTraceCheck = new BooleanSetting("Проверка на наведение", true).setVisible(() -> type.is("Плавная"));
     final BooleanSetting chekarmor = new BooleanSetting("Приоритет на элитры", true);
-    final ModeSetting sprintSetting = new ModeSetting("Сброс спринта", "Легитный", "Легитный", "Пакетный");
+    //final ModeSetting sprintSetting = new ModeSetting("Сброс спринта", "Легитный", "Легитный", "Пакетный");
 
     @Getter
     private final StopWatch stopWatch = new StopWatch();
@@ -111,7 +115,7 @@ public class AttackAura extends Function {
 
     public AttackAura(AutoPotion autoPotion) {
         this.autoPotion = autoPotion;
-        addSettings(bypass,type, attackRange,rotateRange,elytraRotateRange, targets, options, correctionType,sprintSetting, smartCrits, forward,chekarmor, rayTraceCheck, forwardboolean);
+        addSettings(type, attackRange,rotateRange,elytraRotateRange, targets, options, correctionType, smartCrits, forward,chekarmor, rayTraceCheck, forwardboolean);
     }
 
     @Subscribe
@@ -123,7 +127,7 @@ public class AttackAura extends Function {
 
     @Subscribe
     public void onUpdate(EventUpdate e) {
-        if (options.getValueByName("Фокусировать одну цель").get() && (target == null || !isValid(target)) || !options.getValueByName("Фокусировать одну цель").get()) {
+        if (options.getValueByName("Статичная цель").get() && (target == null || !isValid(target)) || !options.getValueByName("Статичная цель").get()) {
             updateTarget();
         }
 
@@ -274,7 +278,7 @@ public class AttackAura extends Function {
                 }
 
                 float finalYaw = rotateVector.x + Math.min(Math.max(yawDelta, -limitedYaw), limitedYaw);
-                float finalPitch = MathHelper.clamp(rotateVector.y + Math.min(Math.max(pitchDelta, -limitedPitch), limitedPitch), -89, 89.0F);
+                float finalPitch = MathHelper.clamp(rotateVector.y + Math.min(Math.max(pitchDelta, -limitedPitch), limitedPitch) + (mc.player.isElytraFlying() ? SensUtils.getSensitivity((float) (Math.cos(System.currentTimeMillis() / 50L) * 7.0F)) : 0.0f), -89, 89.0F);
 
                 float gcd = SensUtils.getGCDValue();
 
@@ -335,7 +339,7 @@ public class AttackAura extends Function {
             mc.playerController.onStoppedUsingItem(mc.player);
         }
 
-        boolean sprinting = sprintSetting.is("Пакетный") && mc.player.serverSprintState;
+        boolean sprinting = !ClientUtil.isConnectedToServer("legendsgrief") && mc.player.serverSprintState;
 
         if (sprinting) {
             mc.player.connection.sendPacket(new CEntityActionPacket(mc.player, CEntityActionPacket.Action.STOP_SPRINTING));
@@ -343,24 +347,25 @@ public class AttackAura extends Function {
 
         AutoSprint autoSprint = NovaCore.getInstance().getFunctionRegistry().getAutoSprint();
 
-        if (sprintSetting.is("Легитный") && autoSprint.isState()) {
+        if (!ClientUtil.isConnectedToServer("legendsgrief") && autoSprint.isState()) {
             autoSprint.setEmergencyStop(true);
         }
-        if (mc.player.isSprinting()) mc.player.setSprinting(false);
+//        if (mc.player.isSprinting()) mc.player.setSprinting(false);
+//
+//        if (bypass.get().equals("ReallyWorld")) {
+//            cpsLimit = System.currentTimeMillis() + 500;
+//            if(mc.player.isSprinting())
+//                mc.player.setSprinting(false);
+//
+//        } else if (bypass.get().equals("LegendsGrief")) {
+//            cpsLimit = System.currentTimeMillis() + 500+ (int) (Math.random() * 71);
+//            if ((double) mc.timer.timerSpeed == 1.0) {
+//                mc.timer.timerSpeed = 1.005F;
+//                if(mc.player.isSprinting()) mc.player.setSprinting(false);
+//            }
+//        }
 
-        if (bypass.get().equals("ReallyWorld")) {
-            cpsLimit = System.currentTimeMillis() + 500;
-            if(mc.player.isSprinting())
-                mc.player.setSprinting(false);
-
-        } else if (bypass.get().equals("LegendsGrief")) {
-            cpsLimit = System.currentTimeMillis() + 500+ (int) (Math.random() * 71);
-            if ((double) mc.timer.timerSpeed == 1.0) {
-                mc.timer.timerSpeed = 1.005F;
-                if(mc.player.isSprinting()) mc.player.setSprinting(false);
-            }
-        }
-
+        cpsLimit = System.currentTimeMillis() + 500;
         mc.playerController.attackEntity(mc.player, target);
         mc.player.swingArm(Hand.MAIN_HAND);
 
@@ -393,7 +398,7 @@ public class AttackAura extends Function {
                 || mc.player.isElytraFlying()
                 || mc.player.isSwimming();
 
-        if (mc.player.getDistance(target) > attackRange.get() || mc.player.getCooledAttackStrength(options.getValueByName("Синхронизировать атаку с ТПС").get() ? NovaCore.getInstance().getTpsCalc().getAdjustTicks() : 1.5f) < 0.93f) return false;
+        if (mc.player.getDistance(target) > attackRange.get() || mc.player.getCooledAttackStrength(options.getValueByName("Учитовать ТПС").get() ? NovaCore.getInstance().getTpsCalc().getAdjustTicks() : 1.5f) < 0.93f) return false;
 
         if (!reasonForAttack && options.get(0).get()) return onSpace || !mc.player.isOnGround() && mc.player.fallDistance > 0;
 
@@ -433,7 +438,7 @@ public class AttackAura extends Function {
             return false;
         }
 
-        if (entity instanceof MonsterEntity || entity instanceof AnimalEntity && !targets.getValueByName("Мобы").get()) {
+        if (entity instanceof MonsterEntity || entity instanceof PhantomEntity || entity instanceof VillagerEntity || entity instanceof AnimalEntity && !targets.getValueByName("Мобы").get()) {
             return false;
         }
 
@@ -467,7 +472,6 @@ public class AttackAura extends Function {
             }
         }
     }
-
 
     private void reset() {
         if (options.getValueByName("Коррекция движения").get()) {
