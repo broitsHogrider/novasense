@@ -46,7 +46,7 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+//    Я БЕЗ ПРАВ НА TONKA, Я ДЕЛАЮ SKRRT
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class NovaCore {
@@ -56,12 +56,9 @@ public class NovaCore {
     public static final String CLIENT_NAME = "NovaCore Moon | ";
     public static final String BUILD_DATE = "#21022025";
 
-
-    // Экземпляр Novacore
     @Getter
     private static NovaCore instance;
 
-    // Менеджеры
     private FunctionRegistry functionRegistry;
     private ConfigStorage configStorage;
     private CommandDispatcher commandDispatcher;
@@ -72,16 +69,14 @@ public class NovaCore {
     private LastAccountConfig lastAccountConfig;
     private NotificationManager notificationManager;
     private AltConfig altConfig;
-    // Менеджер событий
+
     private final EventSystem eventSystem = new EventSystem();
 
-    // Директории
     private final File clientDir = new File(Minecraft.getInstance().gameDir + "\\novacore");
     private final File filesDir = new File(Minecraft.getInstance().gameDir + "\\novacore\\files");
 
     private Panel dropDown;
 
-    // Конфигурация и обработчики
     private ViaMCP viaMCP;
     private TPSCalc tpsCalc;
 

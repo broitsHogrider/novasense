@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+//By Chat-GPT
 public class EventSystem {
     private static final Map<Class<?>, List<Subscriber>> subscribers = new HashMap<>();
 

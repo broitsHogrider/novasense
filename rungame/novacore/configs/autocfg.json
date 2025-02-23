@@ -1,21 +1,12 @@
 {
   "functions": {
-    "anti elytra target": {
-      "bind": 341,
-      "state": false
-    },
     "antibot": {
       "bind": 0,
       "state": true
     },
-    "antipush": {
+    "antitarget": {
       "bind": 0,
-      "state": true,
-      "Тип": {
-        "Игроки": true,
-        "Вода": false,
-        "Блоки": true
-      }
+      "state": false
     },
     "arrows": {
       "bind": 0,
@@ -24,46 +15,37 @@
     "attackaura": {
       "bind": 82,
       "state": false,
-      "Обход Античита": "LegendsGrief",
-      "Тип": "Плавная",
-      "Дистанция аттаки": 3.2,
+      "Тип": "Резкий",
+      "Дистанция аттаки": 3.1,
       "Дистанция наведение": 1.0,
       "Элитра наведение": 40.0,
       "Таргеты": {
         "Игроки": true,
-        "Мобы": false,
-        "Друзья": false,
         "Голые": true,
+        "Мобы": false,
+        "Животные": false,
+        "Друзья": false,
+        "Голые невидимки": true,
         "Невидимки": true
       },
-      "Настройки": {
+      "Опции": {
         "Только криты": true,
         "Ломать щит": true,
         "Отжимать щит": true,
         "Синхронизировать атаку с ТПС": false,
         "Фокусировать одну цель": true,
-        "Коррекция движения": true,
-        "Бить через стены": true,
-        "Не бить когда ешь": true,
-        "Не бить с щитом": true
+        "Коррекция движения": true
       },
-      "Тип коррекции": "Незаметный",
-      "Сброс спринта": "Пакетный",
-      "Умные криты": true,
-      "Значение обгона": 2.2,
-      "Приоритет на элитры": false,
-      "Проверка на наведение": false,
-      "Обгонять": true
+      "Тип коррекции": "Сфокусированный",
+      "Умная коррекция": true,
+      "Обгон": true,
+      "Рисовать позицию": true,
+      "Значение обгона": 60.0
     },
     "autoaccept": {
       "bind": 0,
       "state": false,
       "Только друзья": true
-    },
-    "autoarmor": {
-      "bind": 0,
-      "state": false,
-      "Задержка": 92.0
     },
     "autoexplosion": {
       "bind": 293,
@@ -84,16 +66,26 @@
     },
     "autopotion": {
       "bind": 88,
-      "state": false
+      "state": false,
+      "Бросать": {
+        "Сила": true,
+        "Скорость": true,
+        "Огнестойкость": true,
+        "Исцеление": true
+      },
+      "Здоровье": 9.0
+    },
+    "autosprint": {
+      "bind": 0,
+      "state": true,
+      "Keep Sprint": true,
+      "Игнорировать плохие эффекты": false
     },
     "autoswap": {
       "bind": 0,
-      "state": false,
-      "Тип": "Умный",
-      "Предмет": "Щит",
-      "Свапать на": "Геплы",
-      "Кнопка": -1,
-      "Здоровье": 11.0
+      "state": true,
+      "Свап": 341,
+      "Что на что?": "Шар \u0026 Гепл"
     },
     "autotool": {
       "bind": 0,
@@ -103,21 +95,20 @@
     "autototem": {
       "bind": 0,
       "state": true,
-      "Настройки": {
-        "Золотые сердца": true,
-        "Кристалл": true,
+      "Здоровье": 4.0,
+      "Отображать кол-во": true,
+      "Возвращать": true,
+      "Не брать при шаре": true,
+      "Условие": {
+        "Поглощение": true,
         "Обсидиан": false,
+        "Кристалл": true,
         "Якорь": false,
-        "Падение": true,
-        "Кристалл в руке": false,
-        "Здоровье на элитре": true
+        "Падение": false
       },
-      "Здоровье": 3.95,
-      "Возвращать предмет": true,
-      "Не свапать если шар": false,
-      "Радиус до обсидиана": 6.0,
-      "Здоровье на элитре": 9.46,
-      "Дистанция падение": 20.0
+      "Радиус от обсы": 6.0,
+      "Радиус от кристалла": 6.0,
+      "Радиус от якоря": 6.0
     },
     "betterminecraft": {
       "bind": 0,
@@ -132,7 +123,7 @@
     },
     "china hat": {
       "bind": 0,
-      "state": true,
+      "state": false,
       "У друзей": true
     },
     "clickfriend": {
@@ -162,16 +153,13 @@
     "esp": {
       "bind": 0,
       "state": false,
-      "Включить": {
-        "Предметы": false,
-        "Полоску хп": false,
-        "Текст хп": false,
-        "Зачарования": false,
-        "Список эффектов": false,
-        "Индикация Сфер": false,
-        "Индикация Талисманов": false
-      },
-      "Тип ": "Углы"
+      "Убрать": {
+        "Боксы": true,
+        "Полоску хп": true,
+        "Текст хп": true,
+        "Зачарования": true,
+        "Список эффектов": true
+      }
     },
     "elytraboost": {
       "bind": 86,
@@ -188,10 +176,9 @@
       "Кнопка свапа": 90,
       "Кнопка фейерверка": 32,
       "Авто-взлёт": true,
-      "Использовать фейерверк": false,
-      "Заддержка": 10000.0
+      "Авто-фейерверк": true
     },
-    "fly": {
+    "flight": {
       "bind": 0,
       "state": false,
       "Мод": "Vanilla",
@@ -238,7 +225,7 @@
     },
     "item 360": {
       "bind": 0,
-      "state": true,
+      "state": false,
       "Если нету таргета": false,
       "Правая рука": true,
       "Левая рука": false
@@ -277,10 +264,6 @@
     },
     "nameprotect": {
       "bind": 0,
-      "state": true
-    },
-    "noclip": {
-      "bind": 0,
       "state": false
     },
     "noentitytrace": {
@@ -315,6 +298,15 @@
       "bind": 0,
       "state": true
     },
+    "nopush": {
+      "bind": 0,
+      "state": true,
+      "Тип": {
+        "Игроки": true,
+        "Вода": false,
+        "Блоки": true
+      }
+    },
     "norender": {
       "bind": 0,
       "state": true,
@@ -323,11 +315,12 @@
         "Линия босса": true,
         "Анимация тотема": true,
         "Тайтлы": true,
-        "Таблица": true,
+        "Таблица": false,
         "Туман": true,
         "Тряску камеры": true,
         "Плохие эффекты": true,
-        "Дождь": true
+        "Дождь": true,
+        "Задний фон интерфейсов": true
       }
     },
     "norotate": {
@@ -336,22 +329,19 @@
     },
     "noslow": {
       "bind": 0,
-      "state": false,
+      "state": true,
       "Мод": "Grim"
     },
     "particles": {
       "bind": 0,
-      "state": false,
-      "Вид": "Доллар",
-      "Кол-во за удар": 26.0
-    },
-    "phase": {
-      "bind": 0,
-      "state": false
+      "state": true,
+      "Тип": "SnowFlake",
+      "Quantity": 12.0,
+      "Gravity strange": 2.5
     },
     "predictions": {
       "bind": 0,
-      "state": true
+      "state": false
     },
     "rwhelper": {
       "bind": 0,
@@ -367,21 +357,11 @@
       "bind": 0,
       "state": false
     },
-    "shaderhand": {
-      "bind": 0,
-      "state": false
-    },
     "spider": {
       "bind": 0,
       "state": false,
       "Speed": 2.0,
       "Mode": "Grim"
-    },
-    "sprint": {
-      "bind": 0,
-      "state": true,
-      "Keep Sprint": true,
-      "Игнорировать плохие эффекты": false
     },
     "storageesp": {
       "bind": 0,
@@ -396,16 +376,18 @@
     "swinganimation": {
       "bind": 0,
       "state": true,
-      "Мод": "4",
-      "Сила": 1.0,
-      "Скорость": 10.0,
-      "Размер": 0.55,
-      "Только с киллаурой": false
+      "Оффсеты рук": true,
+      "Дистанция по X": 0.5,
+      "Дистанция по Y": -0.2,
+      "Дистанция по Z": -0.7,
+      "Только при киллке": false,
+      "Анимации": "Smooth New",
+      "Скорость анимации": 1.35
     },
     "targetesp": {
       "bind": 0,
       "state": true,
-      "Тип": "Квадрат"
+      "Тип": "Призраки"
     },
     "targetstrafe": {
       "bind": 0,
@@ -423,11 +405,11 @@
     "tracers": {
       "bind": 0,
       "state": false,
-      "Игнорировать голых": true
+      "Игнорировать голых": false
     },
     "trails": {
       "bind": 0,
-      "state": true
+      "state": false
     },
     "triggerbot": {
       "bind": 0,
@@ -439,19 +421,9 @@
       "Ломать щит": false
     },
     "velocity": {
-      "bind": 0,
+      "bind": 71,
       "state": false,
-      "Mode": "Cancel"
-    },
-    "viewmodel": {
-      "bind": 0,
-      "state": false,
-      "RightX": 0.6,
-      "RightY": -0.1,
-      "RightZ": -0.9,
-      "LeftX": 0.0,
-      "LeftY": 0.0,
-      "LeftZ": 0.0
+      "Mode": "Grim Cancel"
     },
     "world": {
       "bind": 0,
@@ -464,6 +436,9 @@
     }
   },
   "styles": {
+    "Новогодний": {
+      "selected": false
+    },
     "Космический": {
       "selected": false
     },
@@ -477,10 +452,10 @@
       "selected": false
     },
     "Малиновый": {
-      "selected": false
+      "selected": true
     },
     "Огненный": {
-      "selected": true
+      "selected": false
     },
     "Кровавый": {
       "selected": false

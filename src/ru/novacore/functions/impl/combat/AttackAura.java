@@ -1,5 +1,7 @@
 package ru.novacore.functions.impl.combat;
 
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.util.math.BlockPos;
 import ru.novacore.events.EventHandler;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
@@ -29,6 +31,7 @@ import ru.novacore.events.EventSystem;
 import ru.novacore.command.friends.FriendStorage;
 import ru.novacore.events.input.EventInput;
 import ru.novacore.events.input.EventMotion;
+import ru.novacore.events.render.EventDisplay;
 import ru.novacore.events.server.EventPacket;
 import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
@@ -45,6 +48,8 @@ import ru.novacore.utils.math.StopWatch;
 import ru.novacore.utils.player.InventoryUtil;
 import ru.novacore.utils.player.MouseUtil;
 import ru.novacore.utils.player.MoveUtils;
+import ru.novacore.utils.render.ColorUtils;
+import ru.novacore.utils.render.RenderUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -84,6 +89,8 @@ public class AttackAura extends Function {
 
     final BooleanSetting obgon = new BooleanSetting("Обгон", false);
 
+    final BooleanSetting drawPredictedPosition = new BooleanSetting("Рисовать позицию", false).setVisible(obgon::get);
+
     final SliderSetting obgonVal = new SliderSetting("Значение обгона", 75f, 0f, 100f, 1f).setVisible(obgon::get);
 
     @Getter
@@ -101,13 +108,21 @@ public class AttackAura extends Function {
 
     public AttackAura(AutoPotion autoPotion) {
         this.autoPotion = autoPotion;
-        addSettings(type, attackRange, searchRange,elytraSearchRange, targets, options, correctionType, smartCorrection, obgon, obgonVal);
+        addSettings(type, attackRange, searchRange,elytraSearchRange, targets, options, correctionType, smartCorrection, obgon,drawPredictedPosition, obgonVal);
     }
 
     @EventHandler
     public void onInput(EventInput eventInput) {
         if (options.getValueByName("Коррекция движения").get() && correctionType.is("Незаметный") && target != null && mc.player != null) {
             MoveUtils.fixMovement(eventInput, autoPotion.isActive() ? Minecraft.getInstance().player.rotationYaw : rotateVector.x);
+        }
+    }
+
+    @EventHandler
+    public void onDisplay(WorldRenderer eventDisplay) {
+        if (target != null && drawPredictedPosition.get() && target.isElytraFlying()) {
+            Vector3d espPosition = target.getPositionVec().add(target.getLookVec().normalize().scale(5.0));
+            RenderUtils.Render3D.drawBlockBox(new BlockPos(espPosition), -1);
         }
     }
 
