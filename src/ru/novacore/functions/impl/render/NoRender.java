@@ -1,8 +1,8 @@
 package ru.novacore.functions.impl.render;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.EventCancelOverlay;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.render.EventCancelOverlay;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -24,18 +24,19 @@ public class NoRender extends Function {
             new BooleanSetting("Туман", true),
             new BooleanSetting("Тряску камеры", true),
             new BooleanSetting("Плохие эффекты", true),
-            new BooleanSetting("Дождь", true));
+            new BooleanSetting("Дождь", true),
+            new BooleanSetting("Задний фон интерфейсов", false));
 
     public NoRender() {
         addSettings(element);
     }
 
-    @Subscribe
+    @EventHandler
     private void onUpdate(EventUpdate e) {
         handleEventUpdate(e);
     }
 
-    @Subscribe
+    @EventHandler
     private void onEventCancelOverlay(EventCancelOverlay e) {
         handleEventOverlaysRender(e);
     }

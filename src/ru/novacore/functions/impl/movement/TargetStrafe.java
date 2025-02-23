@@ -1,8 +1,9 @@
 package ru.novacore.functions.impl.movement;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 //.events.*;
-import ru.novacore.events.*;
+import ru.novacore.events.player.*;
+import ru.novacore.events.server.EventPacket;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -51,13 +52,13 @@ public class TargetStrafe extends Function {
         addSettings(distanceSetting, damageBoostSetting, timeSetting, saveTarget);
     }
 
-    @Subscribe
+    @EventHandler
     private void onAction(ActionEvent e) {
         if (mc.player == null || mc.world == null) return;
         handleEventAction(e);
     }
 
-    @Subscribe
+    @EventHandler
     public void onMotion(final MovingEvent event) {
 
         if (mc.player == null || mc.world == null || mc.player.ticksExisted < 10) return;
@@ -98,13 +99,13 @@ public class TargetStrafe extends Function {
         }
     }
 
-    @Subscribe
+    @EventHandler
     private void onPostMove(PostMoveEvent e) {
         if (mc.player == null || mc.world == null) return;
         strafeMovement.postMove(e.getHorizontalMove());
     }
 
-    @Subscribe
+    @EventHandler
     private void onPacket(EventPacket e) {
         if (mc.player == null || mc.world == null) return;
         if (e.getType() == EventPacket.Type.RECEIVE) {
@@ -115,13 +116,13 @@ public class TargetStrafe extends Function {
         }
     }
 
-    @Subscribe
+    @EventHandler
     private void onDamage(EventDamageReceive e) {
         if (mc.player == null || mc.world == null) return;
         damageUtil.processDamage(e);
     }
 
-    @Subscribe
+    @EventHandler
     public void onUpdate(EventUpdate e) {
         if (mc.player.isOnGround() && !mc.gameSettings.keyBindJump.pressed && target != null && target.isAlive()) {
             mc.player.jump();

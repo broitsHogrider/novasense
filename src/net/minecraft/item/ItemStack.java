@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.player.ItemCooldown;
 import net.minecraft.advancements.CriteriaTriggers;

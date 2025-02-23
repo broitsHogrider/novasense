@@ -5,6 +5,7 @@ import lombok.experimental.UtilityClass;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.ui.styles.StyleManager;
 
 import java.awt.*;
@@ -69,6 +70,10 @@ public class ColorUtils {
                 (color & 0xFF) / 255f,
                 (color >> 24 & 0xFF) / 255f
         };
+    }
+
+    public Color random() {
+        return new Color(Color.HSBtoRGB((float) Math.random(), (float) (0.75F + (Math.random() / 4F)), (float) (0.75F + (Math.random() / 4F))));
     }
 
     public static int gradient(int speed, int index, int... colors) {

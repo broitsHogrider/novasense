@@ -1,8 +1,8 @@
 package net.minecraft.util;
 
-import ru.novacore.NovaCore;
-import ru.novacore.events.EventInput;
 import net.minecraft.client.GameSettings;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.input.EventInput;
 
 public class MovementInputFromOptions extends MovementInput {
     private final GameSettings gameSettings;
@@ -25,7 +25,7 @@ public class MovementInputFromOptions extends MovementInput {
         this.sneaking = this.gameSettings.keyBindSneak.isKeyDown();
         final EventInput moveInputEvent = new EventInput(moveForward, moveStrafe, jump, sneaking, 0.3D);
 
-        NovaCore.getInstance().getEventBus().post(moveInputEvent);
+        EventSystem.call(moveInputEvent);
 
         final double sneakMultiplier = moveInputEvent.getSneakSlowDownMultiplier();
         this.moveForward = moveInputEvent.getForward();

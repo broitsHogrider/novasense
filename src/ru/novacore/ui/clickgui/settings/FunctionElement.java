@@ -55,7 +55,8 @@ public class FunctionElement extends Element {
 
         animation.setDirection(module.isState() ? Direction.FORWARDS : Direction.BACKWARDS);
 
-        RenderUtils.Render2D.drawRound(x, y, width, height + getComponentHeight(), 5, ColorUtils.rgb(16, 16, 16));
+        RenderUtils.Render2D.drawRound(x - 0.5f, y - 0.5f, width + 1, height + getComponentHeight() + 1, 5,  ColorUtils.rgb(34,36,46));//outline
+        RenderUtils.Render2D.drawRound(x, y, width, height + getComponentHeight(), 5, ColorUtils.rgb(18,18,25));//rect
 
         float offset = y + height;
         for (Element element : element) {
@@ -73,11 +74,8 @@ public class FunctionElement extends Element {
             key = "...";
         }
 
-        if (module.isState()) {
-            RenderUtils.Render2D.drawShadow(x + 5, y + 7.5f, Fonts.interMedium.getWidth(binding ? "Модуль забинжен: [" + key.toUpperCase() + "]" : module.getName(), 6.5f), 5, 10, ColorUtils.rgba(240, 240, 240, 100));
-        }
 
-        Fonts.interMedium.drawText(matrixStack, binding ? "Модуль забинжен: " + module.getBind() : module.getName(), x + 5, y + 8f,  module.isState() ? -1 : ColorUtils.rgba(200, 200, 200, 200), 6.5f);
+        Fonts.interMedium.drawText(matrixStack, binding ? "Модуль забинжен: " + key : module.getName(), x + 5, y + 7.5f,  module.isState() ? -1 : ColorUtils.rgba(200, 200, 200, 200), 7.5f);
     }
 
     @Override

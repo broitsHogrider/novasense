@@ -8,9 +8,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
-import ru.novacore.NovaCore;
-import ru.novacore.functions.api.FunctionRegistry;
-import ru.novacore.functions.impl.misc.SelfDestruct;
 import ru.novacore.utils.client.IMinecraft;
 
 public class ChestScreen extends ContainerScreen<ChestContainer> implements IHasContainer<ChestContainer>, IMinecraft {
@@ -24,6 +21,7 @@ public class ChestScreen extends ContainerScreen<ChestContainer> implements IHas
      */
     private final int inventoryRows;
     private final ITextComponent title;
+
 
     public ChestScreen(ChestContainer container, PlayerInventory playerInventory, ITextComponent title) {
         super(container, playerInventory, title);
@@ -41,7 +39,6 @@ public class ChestScreen extends ContainerScreen<ChestContainer> implements IHas
     @Override
     protected void init() {
         super.init();
-
     }
 
     @Override
@@ -52,7 +49,7 @@ public class ChestScreen extends ContainerScreen<ChestContainer> implements IHas
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 
-        this.renderBackground(matrixStack);
+
         super.render(matrixStack, mouseX, mouseY, partialTicks);
         this.renderHoveredTooltip(matrixStack, mouseX, mouseY);
 

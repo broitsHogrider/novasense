@@ -14,6 +14,7 @@ import com.viaversion.viaversion.api.platform.ViaPlatform;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.libs.gson.JsonObject;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import via.ViaLoadingBase;
 import via.platform.viaversion.ViaAPIWrapper;
 import via.platform.viaversion.ViaConfig;

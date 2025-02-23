@@ -6,8 +6,9 @@ import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import ru.novacore.NovaCore;
-import ru.novacore.functions.impl.render.GlassHand;
-import ru.novacore.events.EventCancelOverlay;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.render.Render3DPosedEvent;
+import ru.novacore.events.render.EventCancelOverlay;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.combat.NoEntityTrace;
 import ru.novacore.functions.impl.misc.BetterMinecraft;
@@ -478,7 +479,7 @@ public class GameRenderer implements IResourceManagerReloadListener, AutoCloseab
 
     private void hurtCameraEffect(MatrixStack matrixStackIn, float partialTicks) {
         EventCancelOverlay eventCancelOverlay = new EventCancelOverlay(EventCancelOverlay.Overlays.HURT);
-        NovaCore.getInstance().getEventBus().post(eventCancelOverlay);
+        EventSystem.call(eventCancelOverlay);
 
         if (eventCancelOverlay.isCancel()) {
             eventCancelOverlay.open();
@@ -861,6 +862,7 @@ public class GameRenderer implements IResourceManagerReloadListener, AutoCloseab
         }
     }
 
+
     public void renderWorld(float partialTicks, long finishTimeNano, MatrixStack matrixStackIn) {
         this.lightmapTexture.updateLightmap(partialTicks);
 
@@ -946,6 +948,8 @@ public class GameRenderer implements IResourceManagerReloadListener, AutoCloseab
         matrixStackIn.rotate(Vector3f.YP.rotationDegrees(activerenderinfo.getYaw() + 180.0F));
         this.mc.worldRenderer.updateCameraAndRender(matrixStackIn, partialTicks, finishTimeNano, flag1,
                 activerenderinfo, this, this.lightmapTexture, matrix4f);
+
+        EventSystem.call(new Render3DPosedEvent(partialTicks, matrixStackIn, mc.getMainWindow(), matrix4f, activerenderinfo));
 
         if (Reflector.ForgeHooksClient_dispatchRenderLast.exists()) {
             this.mc.getProfiler().endStartSection("forge_render_last");

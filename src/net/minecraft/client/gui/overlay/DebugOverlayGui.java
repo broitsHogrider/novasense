@@ -7,6 +7,7 @@ import com.mojang.blaze3d.platform.PlatformDescriptors;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.DataFixUtils;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.misc.SelfDestruct;
 import it.unimi.dsi.fastutil.longs.LongSet;

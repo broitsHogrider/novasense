@@ -85,10 +85,12 @@ public class MultiBoxElement extends Element {
         }
 
         if (!open) return;
-        int i = 1;
+        int i = 0;
+        int offset = 0;
         for (BooleanSetting s : set.get()) {
-            if (MathUtil.isHovered(mouseX, mouseY, x, y + off + 20F + i, width, 8)) s.set(!s.get());
-            i += 9;
+            offset += 13;
+            if (MathUtil.isHovered(mouseX, mouseY, x + width - rectWidth - 2.5f,y + 14.5f + (float) offset, Fonts.interMedium.getWidth(set.getName(), 6), Fonts.interMedium.getHeight(6))) s.set(!s.get());
+            i++;
         }
     }
 

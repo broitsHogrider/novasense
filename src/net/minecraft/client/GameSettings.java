@@ -444,11 +444,6 @@ public class GameSettings
                         AbstractOption.INVERT_MOUSE.set(this, s1);
                     }
 
-                    if ("realmsNotifications".equals(s))
-                    {
-                        AbstractOption.REALMS_NOTIFICATIONS.set(this, s1);
-                    }
-
                     if ("reducedDebugInfo".equals(s))
                     {
                         AbstractOption.REDUCED_DEBUG_INFO.set(this, s1);
@@ -890,7 +885,6 @@ public class GameSettings
                 printwriter.println("forceUnicodeFont:" + AbstractOption.FORCE_UNICODE_FONT.get(this));
                 printwriter.println("discrete_mouse_scroll:" + AbstractOption.DISCRETE_MOUSE_SCROLL.get(this));
                 printwriter.println("invertYMouse:" + AbstractOption.INVERT_MOUSE.get(this));
-                printwriter.println("realmsNotifications:" + AbstractOption.REALMS_NOTIFICATIONS.get(this));
                 printwriter.println("reducedDebugInfo:" + AbstractOption.REDUCED_DEBUG_INFO.get(this));
                 printwriter.println("snooperEnabled:" + AbstractOption.SNOOPER.get(this));
                 printwriter.println("showSubtitles:" + AbstractOption.SHOW_SUBTITLES.get(this));

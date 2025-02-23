@@ -18,6 +18,13 @@ import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.hogoshi.util.Easing;
+import ru.hogoshi.util.Easings;
+import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
+import ru.novacore.functions.api.FunctionRegistry;
+import ru.novacore.functions.impl.misc.SelfDestruct;
+import ru.novacore.utils.client.ClientUtil;
 
 public class NewChatGui extends AbstractGui
 {
@@ -100,6 +107,17 @@ public class NewChatGui extends AbstractGui
                                     l = this.mc.fontRenderer.func_243245_a(chatline.getLineString()) - 2;
                                 }
 
+                                FunctionRegistry functionRegistry = NovaCore.getInstance().getFunctionRegistry();
+                                SelfDestruct selfDestruct = functionRegistry.getSelfDestruct();
+
+                                chatline.getSlideAnimation().update();
+                                if (chatline.getSlideAnimation().getValue() < 0.1f) {
+                                    chatline.getSlideAnimation().setToValue(1);
+                                }
+
+                                if (!selfDestruct.unhooked) chatline.getSlideAnimation().animate(1, 0.25f, Easings.EXPO_OUT);
+
+                                p_238492_1_.translate((double)(-calculateChatboxWidth(this.mc.gameSettings.chatWidth)) + (double)calculateChatboxWidth(this.mc.gameSettings.chatWidth) * chatline.getSlideAnimation().getValue(), (double)0.0F, (double)50.0F);
                                 if (this.mc.gameSettings.ofChatBackground != 3)
                                 {
                                     fill(p_238492_1_, -2, (int)(d6 - d3), 0 + l + 4, (int)d6, j2 << 24);

@@ -1,264 +1,81 @@
 package ru.novacore.functions.impl.combat;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.*;
+import ru.novacore.events.EventHandler;
+import com.ibm.icu.impl.Pair;
+import net.minecraft.inventory.container.ClickType;
+import net.minecraft.item.AirItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
+import ru.novacore.events.input.EventKey;
+import ru.novacore.events.input.EventMouseButtonPress;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
 import ru.novacore.functions.settings.impl.BindSetting;
-import ru.novacore.functions.settings.impl.BooleanSetting;
 import ru.novacore.functions.settings.impl.ModeSetting;
-import ru.novacore.functions.settings.impl.SliderSetting;
-import ru.novacore.utils.math.StopWatch;
 import ru.novacore.utils.player.InventoryUtil;
-import ru.novacore.utils.player.MoveUtils;
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
-import net.minecraft.client.gui.screen.inventory.InventoryScreen;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.client.util.InputMappings;
-import net.minecraft.item.*;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.play.client.CClickWindowPacket;
-import net.minecraft.network.play.client.CEntityActionPacket;
-import net.minecraft.potion.Effects;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @FunctionInfo(name = "AutoSwap", category = Category.Combat)
 public class AutoSwap extends Function {
-    private final List<IPacket<?>> packet = new ArrayList<>();
-    final ModeSetting swapMode = new ModeSetting("Тип", "Умный", "Умный", "По бинду");
-    final ModeSetting itemType = new ModeSetting("Предмет", "Щит", "Щит", "Геплы", "Тотем", "Шар","Руна","Арбалет","Фейверк");
-    final ModeSetting swapType = new ModeSetting("Свапать на", "Геплы", "Щит", "Геплы", "Тотем", "Шар","Руна","Арбалет","Фейверк");
-    private final BooleanSetting mode = new BooleanSetting("Grim", true);
 
-    final BindSetting keyToSwap = new BindSetting("Кнопка", -1).setVisible(() -> swapMode.is("По бинду"));
-    final SliderSetting health = new SliderSetting("Здоровье", 11.0F, 5.0F, 19.0F, 0.5F).setVisible(() -> swapMode.is("Умный"));
-    final StopWatch stopWatch = new StopWatch();
-    boolean shieldIsCooldown;
-    int oldItem = -1;
-    final StopWatch delay = new StopWatch();
-    final AutoTotem autoTotem;
+    private final BindSetting key = new BindSetting("Свап", -1);
+    
+    private final ModeSetting mode = new ModeSetting("Что на что?","Шар & Щит", "Шар & Щит", "Тотем & Шар", "Щит & Тотем", "Шар & Гепл", "Тотем & Гепл", "Щит & Гепл");
 
-
-    public AutoSwap(AutoTotem autoTotem) {
-        this.autoTotem = autoTotem;
-        addSettings(swapMode, itemType, swapType, keyToSwap, health);
+    private Pair<Item, Item> getSwapPair() {
+        if (mode.is("Шар & Щит")) {
+            return Pair.of(Items.PLAYER_HEAD, Items.SHIELD);
+        }
+        if (mode.is("Тотем & Шар")) {
+            return Pair.of(Items.TOTEM_OF_UNDYING, Items.PLAYER_HEAD);
+        }
+        if (mode.is("Щит & Тотем")) {
+            return Pair.of(Items.SHIELD, Items.TOTEM_OF_UNDYING);
+        }
+        if (mode.is("Шар & Гепл")) {
+            return Pair.of(Items.PLAYER_HEAD, Items.GOLDEN_APPLE);
+        }
+        if (mode.is("Тотем & Гепл")) {
+            return Pair.of(Items.TOTEM_OF_UNDYING, Items.GOLDEN_APPLE);
+        }
+        if (mode.is("Щит & Гепл")) {
+            return Pair.of(Items.SHIELD, Items.GOLDEN_APPLE);
+        }
+        return Pair.of(Items.AIR, Items.AIR);
     }
 
-    @Subscribe
-    public void onEventKey(EventKey e) {
-        if (!swapMode.is("По бинду")) {
-            return;
-        }
-        ItemStack offhandItemStack = mc.player.getHeldItemOffhand();
-        boolean isOffhandNotEmpty = !(offhandItemStack.getItem() instanceof AirItem);
-        if (e.isKeyDown(keyToSwap.get()) && stopWatch.isReached(150)) {
-            Item currentItem = offhandItemStack.getItem();
-            boolean isHoldingSwapItem = currentItem == getSwapItem();
-            boolean isHoldingSelectedItem = currentItem == getSelectedItem();
-            int selectedItemSlot = getSlot(getSelectedItem());
-            int swapItemSlot = getSlot(getSwapItem());
-            if (mode.get()){
-            }
-            if (selectedItemSlot >= 0) {
-                if (!isHoldingSelectedItem) {
-                    InventoryUtil.moveItem(selectedItemSlot, 45, isOffhandNotEmpty);
-                    stopWatch.reset();
-                    return;
-                }
-            }
-            if (mode.get()){
-            }
-            if (swapItemSlot >= 0) {
-                if (!isHoldingSwapItem) {
-                    InventoryUtil.moveItem(swapItemSlot, 45, isOffhandNotEmpty);
-                    stopWatch.reset();
-                }
-            }
-        }
-    }
-    @Subscribe
-    private void onPacket(CEntityActionPacket actionPacket) {
-        switch (actionPacket.getAction()) {
-            case PRESS_SHIFT_KEY:
-                mc.player.setSneaking(true);
-                break;
-        }
+    public AutoSwap() {
+        addSettings(key, mode);
     }
 
-
-    private void updateKeyBindingState(KeyBinding[] keyBindings) {
-        for (KeyBinding keyBinding : keyBindings) {
-            boolean isKeyPressed = InputMappings.isKeyDown(mc.getMainWindow().getHandle(), keyBinding.getDefault().getKeyCode());
-            keyBinding.setPressed(isKeyPressed);
-        }
+    @EventHandler
+    private void onMouse(EventMouseButtonPress eventMouseButtonPress) {
+        if (eventMouseButtonPress.getButton() == key.get()) spaw();
     }
-    public StopWatch wait = new StopWatch();
-
-    @Subscribe
-    private void onCooldown(EventCooldown e) {
-        shieldIsCooldown = isCooldown(e);
+    @EventHandler
+    private void onKeyPress(EventKey eventKey) {
+        if (eventKey.getKey() == key.get()) spaw();
     }
 
-    @Subscribe
-    private void onUpdate(EventUpdate e) {
-        if (!swapMode.is("Умный")) {
-            return;
-        }
+    private void spaw() {
+        boolean handEmpty = (mc.player.getHeldItemOffhand().getItem() instanceof AirItem);
 
-        Item currentItem = mc.player.getHeldItemOffhand().getItem();
-        if (stopWatch.isReached(350L)) {
-            swapIfShieldIsBroken(currentItem);
-            swapIfHealthToLow(currentItem);
-            stopWatch.reset();
-        }
-        boolean isRightClickWithGoldenAppleActive = false;
+        int firstItemSlot = InventoryUtil.getItemSlot(getSwapPair().first);
+        int secondItemSlot = InventoryUtil.getItemSlot(getSwapPair().second);
 
-        if (currentItem == Items.GOLDEN_APPLE && !mc.player.getCooldownTracker().hasCooldown(Items.GOLDEN_APPLE)) {
-            isRightClickWithGoldenAppleActive = mc.gameSettings.keyBindUseItem.isKeyDown();
-        }
-
-
-        if (isRightClickWithGoldenAppleActive) {
-            stopWatch.reset();
-        }
-        if (mode.get()){
-            if(mc.player.isSprinting());
-            mc.player.setSprinting(false);
-            mc.player.motionX = 0;
-            mc.player.motionY = 0;
-            mc.player.motionZ = 0;
-        }
-    }
-
-    @Override
-    public void onDisable() {
-        shieldIsCooldown = false;
-        oldItem = -1;
-        super.onDisable();
-    }
-
-    private void swapIfHealthToLow(Item currentItem) {
-        boolean isOffhandNotEmpty = !(currentItem instanceof AirItem);
-        boolean isHoldingGoldenApple = currentItem == getSwapItem();
-        boolean isHoldingSelectedItem = currentItem == getSelectedItem();
-        boolean gappleIsNotCooldown = !mc.player.getCooldownTracker().hasCooldown(Items.GOLDEN_APPLE);
-
-        int swapItemSlot = getSlot(getSwapItem());
-        int selectedItemSlot = getSlot(getSelectedItem());
-
-
-        if (isLowHealth() && !isHoldingGoldenApple && isHoldingSelectedItem) {
-            if (itemType.is("Шар") && selectedItemSlot >= 0) {
-                InventoryUtil.moveItem(selectedItemSlot, 45, isOffhandNotEmpty);
-                if (isOffhandNotEmpty && oldItem == -1) {
-                    oldItem = selectedItemSlot;
-                }
+        int toSwapSlot = 45;
+        if (firstItemSlot != -1 || secondItemSlot != -1) {
+            if (secondItemSlot == -1) {
+                mc.playerController.windowClick(0, firstItemSlot, 0, ClickType.PICKUP, mc.player);
             } else {
-                InventoryUtil.moveItem(swapItemSlot, 45, isOffhandNotEmpty);
-                if (isOffhandNotEmpty && oldItem == -1) {
-                    oldItem = swapItemSlot;
-                }
+                mc.playerController.windowClick(0, secondItemSlot, 0, ClickType.PICKUP, mc.player);
             }
-        } else if (!isLowHealth() && isHoldingGoldenApple && oldItem >= 0) {
-            InventoryUtil.moveItem(oldItem, 45, isOffhandNotEmpty);
-            oldItem = -1;
-        }
-    }
-
-    private void swapIfShieldIsBroken(Item currentItem) {
-        boolean isOffhandNotEmpty = !(currentItem instanceof AirItem);
-        boolean isHoldingGoldenApple = currentItem == getSwapItem();
-        boolean isHoldingSelectedItem = currentItem == getSelectedItem();
-        boolean gappleIsNotCooldown = !mc.player.getCooldownTracker().hasCooldown(Items.GOLDEN_APPLE);
-
-        int swapItemSlot = getSlot(getSwapItem());
-        int selectedItemSlot = getSlot(getSelectedItem());
-
-
-        if (shieldIsCooldown && !isHoldingGoldenApple && isHoldingSelectedItem && gappleIsNotCooldown) {
-            if (itemType.is("Шар") && selectedItemSlot >= 0) {
-                InventoryUtil.moveItem(selectedItemSlot, 45, isOffhandNotEmpty);
-                if (isOffhandNotEmpty && oldItem == -1) {
-                    oldItem = selectedItemSlot;
-                }
-            } else {
-                InventoryUtil.moveItem(swapItemSlot, 45, isOffhandNotEmpty);
-                if (isOffhandNotEmpty && oldItem == -1) {
-                    oldItem = swapItemSlot;
-                }
-            }
-        } else if (!shieldIsCooldown && isHoldingGoldenApple && oldItem >= 0) {
-            InventoryUtil.moveItem(oldItem, 45, isOffhandNotEmpty);
-            oldItem = -1;
-        }
-    }
-
-    private boolean isLowHealth() {
-        float currentHealth = mc.player.getHealth() + (mc.player.isPotionActive(Effects.ABSORPTION) ? mc.player.getAbsorptionAmount() : 0.0f);
-        return currentHealth <= health.get();
-    }
-
-    private boolean isCooldown(EventCooldown cooldown) {
-        Item item = cooldown.getItem();
-
-
-        if (!itemType.is("Shield")) {
-            return false;
-        } else {
-            return cooldown.isAdded() && item instanceof ShieldItem;
-        }
-    }
-
-    private Item getSwapItem() {
-        return getItemByType(swapType.get());
-    }
-
-    private Item getSelectedItem() {
-        return getItemByType(itemType.get());
-    }
-
-    private Item getItemByType(String itemType) {
-        return switch (itemType) {
-            case "Щит" -> Items.SHIELD;
-            case "Тотем" -> Items.TOTEM_OF_UNDYING;
-            case "Геплы" -> Items.GOLDEN_APPLE;
-            case "Шар" -> Items.PLAYER_HEAD;
-            case "Руна" -> Items.POPPED_CHORUS_FRUIT;
-            case "Арбалет" -> Items.CROSSBOW;
-            case "Фейверк" -> Items.FIREWORK_ROCKET;
-            default -> Items.AIR;
-        };
-    }
-
-    private int getSlot(Item item) {
-        int finalSlot = -1;
-        for (int i = 0; i < 36; i++) {
-            if (mc.player.inventory.getStackInSlot(i).getItem() == item) {
-                if (mc.player.inventory.getStackInSlot(i).isEnchanted()) {
-                    finalSlot = i;
-                    break;
+            mc.playerController.windowClick(0, toSwapSlot, 0, ClickType.PICKUP, mc.player);
+            if (!handEmpty) {
+                if (secondItemSlot == -1) {
+                    mc.playerController.windowClick(0, firstItemSlot, 0, ClickType.PICKUP, mc.player);
                 } else {
-                    finalSlot = i;
-                }
-            }
-        }
-        if (finalSlot < 9 && finalSlot != -1) {
-            finalSlot = finalSlot + 36;
-        }
-        return finalSlot;
-    }
-    @Subscribe
-    public void onPacket(EventPacket e) {
-        if (mode.get()) {
-            if (e.getPacket() instanceof CClickWindowPacket p && MoveUtils.isMoving()) {
-                if (mc.currentScreen instanceof InventoryScreen) {
-                    packet.add(p);
-                    e.cancel();
+                    mc.playerController.windowClick(0, secondItemSlot, 0, ClickType.PICKUP, mc.player);
                 }
             }
         }

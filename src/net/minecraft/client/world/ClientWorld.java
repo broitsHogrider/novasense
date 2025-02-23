@@ -3,7 +3,8 @@ package net.minecraft.client.world;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventEntityLeave;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.player.EventEntityLeave;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap.Entry;
@@ -358,7 +359,7 @@ public class ClientWorld extends World {
             entity.remove();
             this.removeEntity(entity);
             eventEntityLeave.setEntity(entity);
-            NovaCore.getInstance().getEventBus().post(eventEntityLeave);
+            EventSystem.call(eventEntityLeave);
         }
     }
 

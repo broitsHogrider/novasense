@@ -1,6 +1,6 @@
 package ru.novacore.functions.impl.movement;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.EditSignScreen;
 import net.minecraft.client.gui.screen.inventory.InventoryScreen;
@@ -8,8 +8,8 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.client.CClickWindowPacket;
-import ru.novacore.events.EventPacket;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.server.EventPacket;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -94,11 +94,11 @@ public class GuiMove extends Function {
             keyBinding.setPressed(isKeyPressed);
         }
     }
-    @Subscribe
+    @EventHandler
     public void onUpdate(EventUpdate event) {
         onUpdate();
     }
-    @Subscribe
+    @EventHandler
     public void onPacket2(EventPacket event) {
         if (event.getType() == EventPacket.Type.SEND) {
             onPacket(event);

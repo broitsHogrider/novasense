@@ -1,17 +1,17 @@
 package ru.novacore.functions.impl.render;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventUpdate;
-import ru.novacore.events.Render3DPosedEvent;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.player.EventUpdate;
+import ru.novacore.events.render.Render3DPosedEvent;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -27,86 +27,84 @@ import ru.novacore.utils.render.RenderUtils;
 public class TargetESP extends Function {
     private final ModeSetting type = new ModeSetting("Тип", "Квадрат", "Квадрат","Призраки");
 
-    private final AttackAura attackAura;
-
-    public TargetESP(AttackAura attackAura) {
-        this.attackAura = attackAura;
+    public TargetESP() {
         addSettings(type);
     }
 
-    private final Animation alpha = new DecelerateAnimation(500, 1);
 
-    public static long startTime = System.currentTimeMillis();
+    LivingEntity target = null;
 
-    @Subscribe
+    private final Animation alpha = new DecelerateAnimation(600, 255.0f);
+
+    private double speed;
+    private long lastTime = System.currentTimeMillis();
+    @EventHandler
     public void onUpdate(EventUpdate eventUpdate) {
-        alpha.setDirection(attackAura.getTarget() != null ? Direction.FORWARDS : Direction.BACKWARDS);
+        AttackAura aura = NovaCore.getInstance().getFunctionRegistry().getAttackAura();
+        if (aura.getTarget() != null) target = aura.getTarget();
+
+        alpha.setDirection(aura.isState() && aura.getTarget() != null ? Direction.FORWARDS : Direction.BACKWARDS);
     }
 
-    @Subscribe
+    @EventHandler
     private void onWorldEvent(Render3DPosedEvent e) {
-        if (type.is("Призраки")) {
-            if (alpha.finished(Direction.BACKWARDS)) return;
+        if (target == null && !type.is("Призрак")) return;
 
-            LivingEntity target = attackAura.getTarget();
-            MatrixStack matrixStack = e.getMatrix();
-            Vector3d vector3d = RenderUtils.Render3D.getEntityPosition((Entity) target, e.getPartialTicks());
+        MatrixStack matrixStack = e.matrixStack;
+        Vector3d vector3d = RenderUtils.Render3D.getEntityPosition(target, e.partialTicks);
 
-            float time = (float) ((System.currentTimeMillis() - startTime) / 2000f + Math.sin((System.currentTimeMillis() - startTime) / 2000f) / 10f);
-            float[] offsets = new float[]{-0.6f * target.getHeight() / 2f, 0.0f, 0.6f * target.getHeight() / 2f};
-            float radius = target.getWidth() * 1.05f;
+        float time = (float) ((System.currentTimeMillis() - lastTime) / 1500f + Math.sin((System.currentTimeMillis() - lastTime) / 1500f) / 10f);
+        float[] offsets = new float[]{-0.3f * target.getHeight(), 0.3f * target.getHeight()}; // Два призрака с разными высотами
+        float radius = target.getWidth() * 1.2f; // Чуть увеличенный радиус
 
-            for (int iteration = 0; iteration < 3; iteration++) {
+        if (type.is("Призраки") && !alpha.finished(Direction.BACKWARDS)) {
+            for (int iteration = 0; iteration < 2; iteration++) { // Только два призрака
                 float offset = target.getHeight() / 2f + offsets[iteration];
+                float localTime = time * (iteration == 0 ? 1 : -1); // Разные направления вращения
+                float localRadius = radius * (1.0f + iteration * 0.2f);
+                float waveAmplitude = 0.2f + iteration * 0.1f;
 
-                float localTime = time + iteration * 0.3f;
-                float localRadius = radius * (1.0f + iteration * 0.15f);
-                float waveAmplitude = 0.15f + iteration * 0.05f;
-
-                for (float i = localTime * 360; i < localTime * 360 + 68.0f; i += 0.5f) {
+                for (int point = 0; point < 20; ++point) {
+                    float i = localTime * 360 + point * 4.5f; // Чуть изменён угол поворота
                     float progress = (i - localTime * 360) / 68.0f;
-                    float sizeFactor = iteration == 0.6 ? 0.6f - progress * 0.3f : 0.3f + progress * 0.3f;
-                    float size = 0.55f * sizeFactor;
+                    float sizeFactor = 0.5f + progress * 0.3f; // Чуть изменена логика размера
+                    float size = 0.8f * sizeFactor;
 
                     double radians = Math.toRadians(i);
                     double cosPos = Math.cos(radians) * localRadius;
                     double sinPos = Math.sin(radians) * localRadius;
 
-                    double offsetY = offset + Math.sin(radians * (1.2 + iteration * 0.3)) * waveAmplitude;
-                    double zWobble = Math.cos(localTime * 2 + i / 50.0) * 0.1 * iteration;
+                    double offsetY = offset + Math.sin(radians * (1.5 + iteration * 0.3)) * waveAmplitude;
+                    double zWobble = Math.cos(localTime * 1.8 + i / 60.0) * 0.15 * iteration;
 
-                    boolean hurt = attackAura.getTarget().hurtTime - (attackAura.getTarget().hurtTime != 0 ? mc.timer.renderPartialTicks : 0) != 0;
+                    float hurt = target.hurtTime - (target.hurtTime != 0 ? mc.timer.renderPartialTicks : 0);
 
                     matrixStack.push();
                     matrixStack.translate(vector3d.x + cosPos, vector3d.y + offsetY, vector3d.z + sinPos + zWobble);
                     matrixStack.rotate(mc.getRenderManager().getCameraOrientation());
-                    matrixStack.scale(1.0f + 0.05f * iteration, 1.0f, 1.0f); // Легкое масштабирование для каждого призрака
+                    matrixStack.scale(1.05f, 1.0f, 1.0f);
+
+                    int color = ColorUtils.getColor(point * 3, 1.0f);
+                    int lastColor = ColorUtils.interpolateColor(color, ColorUtils.rgb(255, 100, 100), hurt);
 
                     RenderUtils.Render2D.drawTexture(matrixStack, new ResourceLocation("novacore/images/glow.png"),
-                            -size / 2f, -size / 2f, size / 2f, size, size,
-                            !hurt ? ColorUtils.applyOpacity(ColorUtils.getColor(0), (float) (220 * alpha.getOutput())) : ColorUtils.rgba(220, 50, 50, 255),
-                            !hurt ? ColorUtils.applyOpacity(ColorUtils.getColor(90), (float) (220 * alpha.getOutput())) : ColorUtils.rgba(220, 50, 50, 255),
-                            !hurt ? ColorUtils.applyOpacity(ColorUtils.getColor(180), (float) (220 * alpha.getOutput())) : ColorUtils.rgba(220, 50, 50, 255),
-                            !hurt ? ColorUtils.applyOpacity(ColorUtils.getColor(270), (float) (220 * alpha.getOutput())) : ColorUtils.rgba(220, 50, 50, 255)
-                    );
+                            -size / 2f, -size / 2f, size / 2f, size, size, ColorUtils.setAlpha(lastColor, (int) alpha.getOutput()),
+                            ColorUtils.setAlpha(lastColor, (int) alpha.getOutput()), ColorUtils.setAlpha(lastColor, (int) alpha.getOutput()), ColorUtils.setAlpha(lastColor, (int) alpha.getOutput()));
                     matrixStack.pop();
                 }
-
-                time *= -1;
             }
         }
+
     }
 
-
     private long startTime1 = -1; // Переменная для отслеживания времени начала анимации
-    @Subscribe
+    @EventHandler
     private void onWorld(Render3DPosedEvent renderWorldLastEvent) {
-        MatrixStack matrixStack = renderWorldLastEvent.getMatrix();
-        LivingEntity t = NovaCore.getInstance().getFunctionRegistry().getAttackAura().getTarget();
+        MatrixStack matrixStack = renderWorldLastEvent.matrixStack;
 
-        assert mc.world != null;
+        if (mc.world == null && mc.player == null) return;
 
-        if (t != null && type.is("Квадрат")) {
+        if (target != null && type.is("Квадрат") && !alpha.finished(Direction.BACKWARDS)) {
             if (startTime1 == -1) {
                 startTime1 = System.currentTimeMillis();
             }
@@ -119,9 +117,9 @@ public class TargetESP extends Function {
             matrixStack.push();
             ActiveRenderInfo camera = mc.gameRenderer.getActiveRenderInfo();
             matrixStack.translate(
-                    t.lastTickPosX + (t.getPosX() - t.lastTickPosX) * renderWorldLastEvent.getPartialTicks() - camera.getProjectedView().x,
-                    t.lastTickPosY + (t.getPosY() - t.lastTickPosY) * renderWorldLastEvent.getPartialTicks() - camera.getProjectedView().y + (double) (t.getHeight() / 2.0F),
-                    t.lastTickPosZ + (t.getPosZ() - t.lastTickPosZ) * renderWorldLastEvent.getPartialTicks() - camera.getProjectedView().z
+                    target.lastTickPosX + (target.getPosX() - target.lastTickPosX) * renderWorldLastEvent.partialTicks - camera.getProjectedView().x,
+                    target.lastTickPosY + (target.getPosY() - target.lastTickPosY) * renderWorldLastEvent.partialTicks - camera.getProjectedView().y + (double) (target.getHeight() / 2.0F),
+                    target.lastTickPosZ + (target.getPosZ() - target.lastTickPosZ) * renderWorldLastEvent.partialTicks - camera.getProjectedView().z
             );
             matrixStack.rotate(Vector3f.YP.rotationDegrees(-camera.getYaw()));
             matrixStack.rotate(Vector3f.XP.rotationDegrees(camera.getPitch()));
@@ -135,16 +133,18 @@ public class TargetESP extends Function {
 
             matrixStack.rotate(Vector3f.ZP.rotationDegrees((float) (sin * 360) * 1.6f));
 
-            boolean hurt = t.hurtTime - (t.hurtTime != 0 ? mc.timer.renderPartialTicks : 0) != 0;
-
+            boolean hurt = target.hurtTime - (target.hurtTime != 0 ? mc.timer.renderPartialTicks : 0) != 0;
+            
+            int alpha = (int) this.alpha.getOutput();
+            
             RenderUtils.Render2D.drawTexture(matrixStack, new ResourceLocation("novacore/images/target.png"),
-                    -4.5F, -4.5F, 9.0F, 9.0F,!hurt ? ColorUtils.getColor(0) : ColorUtils.rgba(220, 50, 50, 255), !hurt ? ColorUtils.getColor(90) : ColorUtils.rgba(220, 50, 50, 255), !hurt ? ColorUtils.getColor(180) : ColorUtils.rgba(220, 50, 50, 255), !hurt ? ColorUtils.getColor(270) : ColorUtils.rgba(220, 50, 50, 255));
+                    -4.5F, -4.5F, 9.0F, 9.0F,!hurt ? ColorUtils.setAlpha(ColorUtils.getColor(0), alpha) : ColorUtils.rgba(220, 10, 10, alpha), !hurt ? ColorUtils.setAlpha(ColorUtils.getColor(90), alpha) : ColorUtils.rgba(220, 10, 10, alpha), !hurt ? ColorUtils.setAlpha(ColorUtils.getColor(180), alpha) : ColorUtils.rgba(220, 10, 10, alpha), !hurt ? ColorUtils.setAlpha(ColorUtils.getColor(270), alpha) : ColorUtils.rgba(220, 10, 10, alpha));
 
             RenderSystem.enableDepthTest();
             RenderSystem.disableBlend();
             matrixStack.pop();
         } else {
             startTime1 = -1;
-        }    //dsad
+        }
     }
 }

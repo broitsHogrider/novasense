@@ -1,7 +1,7 @@
 package ru.novacore.functions.impl.misc;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.EventPacket;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.server.EventPacket;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -58,7 +58,7 @@ public class RWHelper extends Function {
             "impact", "матикс",
             "импакт", "wurst"};
 
-    @Subscribe
+    @EventHandler
     private void onPacket(EventPacket e) {
         if (e.isSend()) {
             if (e.getPacket() instanceof CChatMessagePacket p) {

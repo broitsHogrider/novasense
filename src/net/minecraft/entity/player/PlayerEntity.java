@@ -6,9 +6,10 @@ import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventLivingUpdate;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.player.EventLivingUpdate;
 import ru.novacore.functions.api.FunctionRegistry;
-import ru.novacore.functions.impl.misc.AntiPush;
+import ru.novacore.functions.impl.misc.NoPush;
 import ru.novacore.functions.impl.movement.AutoSprint;
 import ru.novacore.functions.impl.player.AutoTool;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -174,7 +175,7 @@ public abstract class PlayerEntity extends LivingEntity {
 
         EventLivingUpdate livingUpdate = new EventLivingUpdate();
 
-        NovaCore.getInstance().getEventBus().post(livingUpdate);
+        EventSystem.call(livingUpdate);
 
         if (livingUpdate.isCancel()) {
             livingUpdate.open();
@@ -1998,9 +1999,9 @@ public abstract class PlayerEntity extends LivingEntity {
     @Override
     public boolean isPushedByWater() {
         FunctionRegistry functionRegistry = NovaCore.getInstance().getFunctionRegistry();
-        AntiPush antiPush = functionRegistry.getAntiPush();
+        NoPush noPush = functionRegistry.getNoPush();
 
-        if (antiPush.isState() && antiPush.getModes().getValueByName("Вода").get() && this instanceof ClientPlayerEntity) {
+        if (noPush.isState() && noPush.getModes().getValueByName("Вода").get() && this instanceof ClientPlayerEntity) {
             return false;
         }
         return !this.abilities.isFlying;

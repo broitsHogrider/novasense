@@ -3,11 +3,11 @@ package net.minecraft.client.renderer;
 import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import net.minecraft.item.*;
 import ru.novacore.NovaCore;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.combat.AttackAura;
 import ru.novacore.functions.impl.render.SwingAnimation;
-import ru.novacore.functions.impl.render.ViewModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
@@ -16,10 +16,6 @@ import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.CrossbowItem;
-import net.minecraft.item.FilledMapItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ShootableItem;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
@@ -205,41 +201,18 @@ public class FirstPersonRenderer {
     }
 
     private void transformFirstPerson(MatrixStack matrixStackIn, HandSide handIn, float swingProgress) {
-        FunctionRegistry functionRegistry = NovaCore.getInstance().getFunctionRegistry();
-        SwingAnimation swingAnimation = functionRegistry.getSwingAnimation();
-
-
-        if (swingAnimation.isState()) {
-            int i = handIn == HandSide.RIGHT ? 1 : -1;
-            float power = swingAnimation.swingPower.get() * 10;
-            float f = MathHelper.sin(swingProgress * swingProgress * (float) Math.PI);
-            matrixStackIn.rotate(Vector3f.YP.rotationDegrees((float) i * (45.0F + f * (-power / 4.0f))));
-            float f1 = MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
-            matrixStackIn.rotate(Vector3f.ZP.rotationDegrees((float) i * f1 * -(power / 4.0f)));
-            matrixStackIn.rotate(Vector3f.XP.rotationDegrees(f1 * -power));
-            matrixStackIn.rotate(Vector3f.YP.rotationDegrees((float) i * -45.0F));
-        } else {
-            int i = handIn == HandSide.RIGHT ? 1 : -1;
-            float f = MathHelper.sin(swingProgress * swingProgress * (float) Math.PI);
-            matrixStackIn.rotate(Vector3f.YP.rotationDegrees((float) i * (45.0F + f * -20.0F)));
-            float f1 = MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
-            matrixStackIn.rotate(Vector3f.ZP.rotationDegrees((float) i * f1 * -20.0F));
-            matrixStackIn.rotate(Vector3f.XP.rotationDegrees(f1 * -80.0F));
-            matrixStackIn.rotate(Vector3f.YP.rotationDegrees((float) i * -45.0F));
-        }
+        int i = handIn == HandSide.RIGHT ? 1 : -1;
+        float f = MathHelper.sin(swingProgress * swingProgress * (float) Math.PI);
+        matrixStackIn.rotate(Vector3f.YP.rotationDegrees((float) i * (45.0F + f * -20.0F)));
+        float f1 = MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
+        matrixStackIn.rotate(Vector3f.ZP.rotationDegrees((float) i * f1 * -20.0F));
+        matrixStackIn.rotate(Vector3f.XP.rotationDegrees(f1 * -80.0F));
+        matrixStackIn.rotate(Vector3f.YP.rotationDegrees((float) i * -45.0F));
     }
 
     private void transformSideFirstPerson(MatrixStack matrixStackIn, HandSide handIn, float equippedProg) {
-        FunctionRegistry functionRegistry = NovaCore.getInstance().getFunctionRegistry();
-        SwingAnimation swingAnimation = functionRegistry.getSwingAnimation();
-        AttackAura attackAura = functionRegistry.getAttackAura();
-
         int i = handIn == HandSide.RIGHT ? 1 : -1;
-        if (swingAnimation.onlyAura.get() && attackAura.getTarget() == null) {
-            matrixStackIn.translate((float) i * 0.56F, -0.52F + equippedProg * (-0.6F), -0.72F);
-            return;
-        }
-        matrixStackIn.translate((float) i * 0.56F, -0.52F + equippedProg * (swingAnimation.isState() ? 0.0F : -0.6F), -0.72F);
+        matrixStackIn.translate((float) i * 0.56F, -0.52F + equippedProg * -0.6F, -0.72F);
     }
 
     public void renderItemInFirstPerson(float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer.Impl bufferIn, ClientPlayerEntity playerEntityIn, int combinedLightIn) {
@@ -310,6 +283,9 @@ public class FirstPersonRenderer {
             HandSide handside = flag ? player.getPrimaryHand() : player.getPrimaryHand().opposite();
             matrixStackIn.push();
 
+            FunctionRegistry functionRegistry = NovaCore.getInstance().getFunctionRegistry();
+            SwingAnimation swingAnimation = functionRegistry.getSwingAnimation();
+
             if (stack.isEmpty()) {
                 if (flag && !player.isInvisible()) {
                     this.renderArmFirstPerson(matrixStackIn, bufferIn, combinedLightIn, equippedProgress, swingProgress, handside);
@@ -327,7 +303,7 @@ public class FirstPersonRenderer {
 
                 if (player.isHandActive() && player.getItemInUseCount() > 0 && player.getActiveHand() == handIn) {
                     this.transformSideFirstPerson(matrixStackIn, handside, equippedProgress);
-                    matrixStackIn.translate((double) ((float) i * -0.4785682F), (double) -0.094387F, (double) 0.05731531F);
+                    matrixStackIn.translate((float) i * -0.4785682F, -0.094387F, 0.05731531F);
                     matrixStackIn.rotate(Vector3f.XP.rotationDegrees(-11.935F));
                     matrixStackIn.rotate(Vector3f.YP.rotationDegrees((float) i * 65.3F));
                     matrixStackIn.rotate(Vector3f.ZP.rotationDegrees((float) i * -9.785F));
@@ -342,41 +318,40 @@ public class FirstPersonRenderer {
                         float f15 = MathHelper.sin((f9 - 0.1F) * 1.3F);
                         float f3 = f12 - 0.1F;
                         float f4 = f15 * f3;
-                        matrixStackIn.translate((double) (f4 * 0.0F), (double) (f4 * 0.004F), (double) (f4 * 0.0F));
+                        matrixStackIn.translate(f4 * 0.0F, f4 * 0.004F, f4 * 0.0F);
                     }
 
-                    matrixStackIn.translate((double) (f12 * 0.0F), (double) (f12 * 0.0F), (double) (f12 * 0.04F));
+                    matrixStackIn.translate(f12 * 0.0F, f12 * 0.0F, f12 * 0.04F);
                     matrixStackIn.scale(1.0F, 1.0F, 1.0F + f12 * 0.2F);
                     matrixStackIn.rotate(Vector3f.YN.rotationDegrees((float) i * 45.0F));
                 } else {
                     float f = -0.4F * MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
                     float f1 = 0.2F * MathHelper.sin(MathHelper.sqrt(swingProgress) * ((float) Math.PI * 2F));
                     float f2 = -0.2F * MathHelper.sin(swingProgress * (float) Math.PI);
-                    matrixStackIn.translate((double) ((float) i * f), (double) f1, (double) f2);
+                    matrixStackIn.translate((float) i * f, f1, f2);
                     this.transformSideFirstPerson(matrixStackIn, handside, equippedProgress);
                     this.transformFirstPerson(matrixStackIn, handside, swingProgress);
 
                     if (flag1 && swingProgress < 0.001F) {
-                        matrixStackIn.translate((double) ((float) i * -0.641864F), 0.0D, 0.0D);
+                        matrixStackIn.translate((float) i * -0.641864F, 0.0D, 0.0D);
                         matrixStackIn.rotate(Vector3f.YP.rotationDegrees((float) i * 10.0F));
                     }
                 }
 
                 this.renderItemSide(player, stack, flag2 ? ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND, !flag2, matrixStackIn, bufferIn, combinedLightIn);
             } else {
-                FunctionRegistry functionRegistry = NovaCore.getInstance().getFunctionRegistry();
-                ViewModel viewModel = functionRegistry.getViewModel();
-
                 boolean flag3 = handside == HandSide.RIGHT;
-                if (viewModel.isState()) {
+
+                if (swingAnimation.isState() && swingAnimation.getTranslate().get()) {
                     if (flag3) {
-                        matrixStackIn.translate(viewModel.right_x.get(),
-                                viewModel.right_y.get(), viewModel.right_z.get());
+                        matrixStackIn.translate(swingAnimation.getOffsetX().get(),
+                                swingAnimation.getOffsetY().get(), swingAnimation.getOffsetZ().get());
                     } else {
-                        matrixStackIn.translate(viewModel.left_x.get(),
-                                viewModel.left_y.get(), viewModel.left_z.get());
+                        matrixStackIn.translate(-swingAnimation.getOffsetX().get(),
+                                swingAnimation.getOffsetY().get(), swingAnimation.getOffsetZ().get());
                     }
                 }
+
                 if (player.isHandActive() && player.getItemInUseCount() > 0 && player.getActiveHand() == handIn) {
                     int k = flag3 ? 1 : -1;
 
@@ -397,7 +372,7 @@ public class FirstPersonRenderer {
 
                         case BOW:
                             this.transformSideFirstPerson(matrixStackIn, handside, equippedProgress);
-                            matrixStackIn.translate((double) ((float) k * -0.2785682F), (double) 0.18344387F, (double) 0.15731531F);
+                            matrixStackIn.translate((float) k * -0.2785682F, 0.18344387F, 0.15731531F);
                             matrixStackIn.rotate(Vector3f.XP.rotationDegrees(-13.935F));
                             matrixStackIn.rotate(Vector3f.YP.rotationDegrees((float) k * 35.3F));
                             matrixStackIn.rotate(Vector3f.ZP.rotationDegrees((float) k * -9.785F));
@@ -413,17 +388,17 @@ public class FirstPersonRenderer {
                                 float f14 = MathHelper.sin((f8 - 0.1F) * 1.3F);
                                 float f17 = f11 - 0.1F;
                                 float f19 = f14 * f17;
-                                matrixStackIn.translate((double) (f19 * 0.0F), (double) (f19 * 0.004F), (double) (f19 * 0.0F));
+                                matrixStackIn.translate(f19 * 0.0F, f19 * 0.004F, f19 * 0.0F);
                             }
 
-                            matrixStackIn.translate((double) (f11 * 0.0F), (double) (f11 * 0.0F), (double) (f11 * 0.04F));
+                            matrixStackIn.translate(f11 * 0.0F, f11 * 0.0F, f11 * 0.04F);
                             matrixStackIn.scale(1.0F, 1.0F, 1.0F + f11 * 0.2F);
                             matrixStackIn.rotate(Vector3f.YN.rotationDegrees((float) k * 45.0F));
                             break;
 
                         case SPEAR:
                             this.transformSideFirstPerson(matrixStackIn, handside, equippedProgress);
-                            matrixStackIn.translate((double) ((float) k * -0.5F), (double) 0.7F, (double) 0.1F);
+                            matrixStackIn.translate((float) k * -0.5F, 0.7F, 0.1F);
                             matrixStackIn.rotate(Vector3f.XP.rotationDegrees(-55.0F));
                             matrixStackIn.rotate(Vector3f.YP.rotationDegrees((float) k * 35.3F));
                             matrixStackIn.rotate(Vector3f.ZP.rotationDegrees((float) k * -9.785F));
@@ -438,77 +413,174 @@ public class FirstPersonRenderer {
                                 float f18 = MathHelper.sin((f13 - 0.1F) * 1.3F);
                                 float f20 = f16 - 0.1F;
                                 float f5 = f18 * f20;
-                                matrixStackIn.translate((double) (f5 * 0.0F), (double) (f5 * 0.004F), (double) (f5 * 0.0F));
+                                matrixStackIn.translate(f5 * 0.0F, f5 * 0.004F, f5 * 0.0F);
                             }
 
-                            matrixStackIn.translate(0.0D, 0.0D, (double) (f16 * 0.2F));
+                            matrixStackIn.translate(0.0D, 0.0D, f16 * 0.2F);
                             matrixStackIn.scale(1.0F, 1.0F, 1.0F + f16 * 0.2F);
                             matrixStackIn.rotate(Vector3f.YN.rotationDegrees((float) k * 45.0F));
                     }
                 } else if (player.isSpinAttacking()) {
                     this.transformSideFirstPerson(matrixStackIn, handside, equippedProgress);
                     int j = flag3 ? 1 : -1;
-                    matrixStackIn.translate((double) ((float) j * -0.4F), (double) 0.8F, (double) 0.3F);
+                    matrixStackIn.translate((float) j * -0.4F, 0.8F, 0.3F);
                     matrixStackIn.rotate(Vector3f.YP.rotationDegrees((float) j * 65.0F));
                     matrixStackIn.rotate(Vector3f.ZP.rotationDegrees((float) j * -85.0F));
                 } else {
-                    SwingAnimation swingAnimation = functionRegistry.getSwingAnimation();
                     float f6 = -0.4F * MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
                     float f7 = 0.2F * MathHelper.sin(MathHelper.sqrt(swingProgress) * ((float) Math.PI * 2F));
                     float f10 = -0.2F * MathHelper.sin(swingProgress * (float) Math.PI);
                     int l = flag3 ? 1 : -1;
 
-                    if (!swingAnimation.isState())
-                        matrixStackIn.translate((double) ((float) l * f6), (double) f7, (double) f10);
+                    if (swingAnimation.isState() && swingAnimation.auraCheck() && handIn.equals(Hand.MAIN_HAND) && (handside.equals(HandSide.RIGHT) && (!itemStackMainHand.getItem().equals(Items.SHIELD)))) {
+                        final String swingMode = swingAnimation.getSwingMode().get();
 
-                    this.transformSideFirstPerson(matrixStackIn, handside, equippedProgress);
-                    if (swingAnimation.isState() && handside == HandSide.RIGHT) {
-                        swingAnimation.animationProcess(matrixStackIn, swingProgress, () -> {
-                            this.transformFirstPerson(matrixStackIn, handside, swingProgress);
-                        });
+                        float sin1 = MathHelper.sin(swingProgress * swingProgress * (float) Math.PI);
+                        float sin2 = MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
+
+                        float amplitude = 0.5f;
+                        float sinSmooth = (float) (Math.sin(swingProgress * Math.PI) * amplitude);
+
+                        int i = handside == HandSide.RIGHT ? 1 : -1;
+                        switch (swingMode) {
+
+                            case "Swipe" -> {
+                                matrixStackIn.translate((float) i * 0.56F, -0.32F, -0.72F);
+
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(60));
+                                matrixStackIn.rotate(Vector3f.ZP.rotationDegrees(-60));
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees((sin2 * sin1) * -5));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees((sin2 * sin1) * -120));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(-60));
+                            }
+                            case "Swipe Back" -> {
+                                matrixStackIn.translate((float) i * 0.56F, -0.32F, -0.72F);
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(60));
+                                matrixStackIn.rotate(Vector3f.ZP.rotationDegrees(-60));
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees((sin2 * sin1) * -5));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees((sin2 * sin1) * 120));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(-60));
+                            }
+                            case "Smooth Old" -> {
+                                matrixStackIn.translate((float) i * 0.56F, -0.32F, -0.72F);
+
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(76));
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(sin2 * -5));
+                                matrixStackIn.rotate(Vector3f.XN.rotationDegrees(sin2 * -100));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(sin2 * -155));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(-100));
+                            }
+                            case "Smooth New" -> {
+                                matrixStackIn.translate((float) i * 0.56F, -0.52F, -0.72F);
+                                matrixStackIn.translate(0, 0.1, 0);
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(sin2 * -80));
+                                matrixStackIn.rotate(Vector3f.ZP.rotationDegrees(sin2 * 45));
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(sin2 * 15));
+                                matrixStackIn.translate(0, -0.1, 0);
+                            }
+                            case "Slap" -> {
+                                matrixStackIn.translate((float) i * 0.56F, -0.52F, -0.72F);
+                                matrixStackIn.rotate(Vector3f.XN.rotationDegrees(sin2 * 55));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees((sin2 * sin1) * 2 * -60));
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(sin2 * 60));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(sin2 * 55));
+
+                            }
+                            case "DeadCode" -> {
+
+                                matrixStackIn.translate((float) i * 0.56F, -0.32F, -0.72F);
+                                matrixStackIn.translate(0.5, -0.1, 0);
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(sin2 * -45));
+                                matrixStackIn.translate(-0.5, 0.1, 0);
+
+                                matrixStackIn.translate(0.5, -0.1, 0);
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(sin2 * -20));
+                                matrixStackIn.translate(-0.5, 0.1, 0);
+
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(50));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(-90));
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(50));
+                            }
+                            case "Knife" -> {
+                                matrixStackIn.translate((float) i * 0.80F, -0.52F, -1.2F);
+                                matrixStackIn.translate(0, 0, -1.5 * sin2 * 1);
+                                matrixStackIn.rotate(Vector3f.ZP.rotationDegrees(0));
+                                matrixStackIn.rotate(Vector3f.ZN.rotationDegrees(0));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(-100));
+                            }
+                            case "Lower Power" -> {
+                                matrixStackIn.translate((float) i * 0.56F, -0.32F, -0.72F);
+                                matrixStackIn.translate(-sinSmooth * sinSmooth * sin1, 0, 0);
+
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(61));
+                                matrixStackIn.rotate(Vector3f.ZP.rotationDegrees(sin2));
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees((sin2 * sin1) * -5));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees((sin2 * sin1) * -30));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(-60));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(sinSmooth * -60));
+                            }
+                            case "Pinch" -> {
+                                matrixStackIn.translate((float) i * 0.56F, -0.32F, -0.72F);
+                                matrixStackIn.translate(0, 0, -1.5 * sin2 / 5);
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(80));
+                                matrixStackIn.rotate(Vector3f.ZN.rotationDegrees(45));
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(-55));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees((sin2 * sin1) * 35));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(-80));
+                            }
+                            case "Knock" -> {
+                                matrixStackIn.translate((float) i * 0.56F, -0.32F, -0.72F);
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(sin2 + 55));
+                                matrixStackIn.rotate(Vector3f.ZP.rotationDegrees(-90));
+                                matrixStackIn.rotate(Vector3f.ZP.rotationDegrees(sin2 + 5));
+                                matrixStackIn.rotate(Vector3f.YN.rotationDegrees(sin2 * 35));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(-135));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(sin1 + 15));
+                            }
+                            case "Surf" -> {
+                                matrixStackIn.translate((float) i * 0.56F, -0.32F, -0.72F);
+                                matrixStackIn.translate(0, 0, -1.5 * sin2 / 5);
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(80));
+                                matrixStackIn.rotate(Vector3f.ZN.rotationDegrees(45));
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(-30));
+                                matrixStackIn.translate(0, 0, -0.5 * sin2);
+                                matrixStackIn.rotate(Vector3f.XN.rotationDegrees(sin2 * -100));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(sin2 * -155));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(-90));
+                            }
+                            case "Destroy" -> {
+                                float translateY = sin2 * 0.2F;
+                                float animationSpeed = -0.1F;
+                                translateY += animationSpeed;
+                                matrixStackIn.translate(0.5, -translateY, -0.9F);
+                                matrixStackIn.rotate(Vector3f.ZP.rotationDegrees(170));
+                                matrixStackIn.rotate(Vector3f.ZN.rotationDegrees(15));
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(-55));
+                                matrixStackIn.push();
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(-55.0F));
+                                matrixStackIn.pop();
+                            }
+                            case "Back Feast" -> {
+                                matrixStackIn.translate((float) i * 0.56F, -0.32F, -0.72F);
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(30));
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(sin2 * -75));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(sin2 * -15));
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(30));
+                                matrixStackIn.rotate(Vector3f.XP.rotationDegrees(-80));
+                                matrixStackIn.rotate(Vector3f.YP.rotationDegrees(35));
+                            }
+                            default -> {
+                                matrixStackIn.translate((float) l * f6, f7, f10);
+                                this.transformSideFirstPerson(matrixStackIn, handside, equippedProgress);
+                                this.transformFirstPerson(matrixStackIn, handside, swingProgress);
+                            }
+                        }
+
+
                     } else {
+                        matrixStackIn.translate((float) l * f6, f7, f10);
+                        this.transformSideFirstPerson(matrixStackIn, handside, equippedProgress);
                         this.transformFirstPerson(matrixStackIn, handside, swingProgress);
-                    }
-                }
-                boolean ric = handside == HandSide.RIGHT;
-                boolean ric2 = handside == HandSide.LEFT;
-                if (NovaCore.getInstance().getFunctionRegistry().getItem360().nulltarget.get()) {
-                    if (NovaCore.getInstance().getFunctionRegistry().getAttackAura().getTarget() != null) {
-
-                    } else {
-                        if (NovaCore.getInstance().getFunctionRegistry().getItem360().right.get()) {
-                            if (ric) {
-                                if (NovaCore.getInstance().getFunctionRegistry().getItem360().state) {
-                                    float angle = System.currentTimeMillis() / 4L % 360L;
-                                    matrixStackIn.rotate(Vector3f.XN.rotationDegrees(angle));
-                                }
-                            }
-                        }
-                        if (NovaCore.getInstance().getFunctionRegistry().getItem360().left.get()) {
-                            if (ric2) {
-                                if (NovaCore.getInstance().getFunctionRegistry().getItem360().state) {
-                                    float angle = System.currentTimeMillis() / 4L % 360L;
-                                    matrixStackIn.rotate(Vector3f.XN.rotationDegrees(angle));
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    if (NovaCore.getInstance().getFunctionRegistry().getItem360().right.get()) {
-                        if (ric) { // Леваяя
-                            if (NovaCore.getInstance().getFunctionRegistry().getItem360().state) {
-                                float angle = System.currentTimeMillis() / 4L % 360L;
-                                matrixStackIn.rotate(Vector3f.XN.rotationDegrees(angle));
-                            }
-                        }
-                    }
-                    if (NovaCore.getInstance().getFunctionRegistry().getItem360().left.get()) {
-                        if (ric2) { // правая рука
-                            if (NovaCore.getInstance().getFunctionRegistry().getItem360().state) {
-                                float angle = System.currentTimeMillis() / 4L % 360L;
-                                matrixStackIn.rotate(Vector3f.XN.rotationDegrees(angle));
-                            }
-                        }
                     }
                 }
 

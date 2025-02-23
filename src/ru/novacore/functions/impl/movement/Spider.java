@@ -1,7 +1,7 @@
 package ru.novacore.functions.impl.movement;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.EventMotion;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.input.EventMotion;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -33,7 +33,7 @@ public class Spider extends Function {
         addSettings(spiderSpeed, mode);
     }
 
-    @Subscribe
+    @EventHandler
     private void onMotion(EventMotion motion) {
 
 

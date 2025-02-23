@@ -1,7 +1,7 @@
 package ru.novacore.functions.impl.player;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -34,7 +34,7 @@ public class ChestStealer extends Function {
             Items.DIAMOND,
             Items.NETHERITE_SCRAP);
 
-    @Subscribe
+    @EventHandler
     public void onUpdate(EventUpdate e) {
         if (mc.player.openContainer instanceof ChestContainer container) {
             IInventory lowerChestInventory = container.getLowerChestInventory();

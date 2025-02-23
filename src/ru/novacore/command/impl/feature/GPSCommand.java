@@ -1,6 +1,6 @@
 package ru.novacore.command.impl.feature;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import com.mojang.blaze3d.platform.GlStateManager;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -11,9 +11,10 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.TextFormatting;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.command.*;
 import ru.novacore.command.impl.CommandException;
-import ru.novacore.events.EventDisplay;
+import ru.novacore.events.render.EventDisplay;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.misc.SelfDestruct;
 import ru.novacore.functions.impl.render.Pointers;
@@ -23,7 +24,6 @@ import ru.novacore.utils.render.ColorUtils;
 import ru.novacore.utils.render.RenderUtils;
 import ru.novacore.utils.render.font.Fonts;
 
-import java.awt.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +38,7 @@ public class GPSCommand implements Command, CommandWithAdvice, MultiNamedCommand
     public GPSCommand(Prefix prefix, Logger logger) {
         this.prefix = prefix;
         this.logger = logger;
-        NovaCore.getInstance().getEventBus().register(this);
+        EventSystem.register(this);
     }
 
     @Override
@@ -106,7 +106,7 @@ public class GPSCommand implements Command, CommandWithAdvice, MultiNamedCommand
         );
     }
 
-    @Subscribe
+    @EventHandler
     private void onDisplay(EventDisplay e) {
         FunctionRegistry functionRegistry = NovaCore.getInstance().getFunctionRegistry();
         SelfDestruct selfDestruct = functionRegistry.getSelfDestruct();

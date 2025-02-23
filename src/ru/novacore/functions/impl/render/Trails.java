@@ -5,10 +5,10 @@ import java.util.List;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import org.lwjgl.opengl.GL11;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import ru.novacore.events.WorldEvent;
+import ru.novacore.events.render.WorldEvent;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -24,7 +24,7 @@ import net.minecraft.util.math.vector.Vector3d;
 @FunctionInfo(name = "Trails", category = Category.Render)
 public class Trails extends Function {
 
-    @Subscribe
+    @EventHandler
     public void onRender(WorldEvent event) {
 
             for (PlayerEntity entity : mc.world.getPlayers()) {

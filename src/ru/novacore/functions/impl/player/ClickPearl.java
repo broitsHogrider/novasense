@@ -1,13 +1,11 @@
 package ru.novacore.functions.impl.player;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import net.minecraft.item.Items;
 import net.minecraft.network.play.client.CHeldItemChangePacket;
 import net.minecraft.network.play.client.CPlayerTryUseItemPacket;
 import net.minecraft.util.Hand;
-import ru.novacore.events.EventKey;
-import ru.novacore.events.EventMotion;
-import ru.novacore.events.EventMouseButtonPress;
+import ru.novacore.events.input.EventKey;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -23,7 +21,7 @@ public class ClickPearl extends Function {
         addSettings(bindSetting);
     }
 
-    @Subscribe
+    @EventHandler
     private void onKey(EventKey eventKey) {
         if (eventKey.getKey() == bindSetting.get() && !mc.player.getCooldownTracker().hasCooldown(Items.ENDER_PEARL)) {
             int hotbarPearls = InventoryUtil.getInstance().getSlotInInventoryOrHotbar(Items.ENDER_PEARL, true);

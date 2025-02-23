@@ -1,7 +1,7 @@
 package ru.novacore.functions.impl.player;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -23,7 +23,7 @@ public class AutoLeave extends Function {
     public AutoLeave() {
         addSettings(action, distance);
     }
-    @Subscribe
+    @EventHandler
     private void onUpdate(EventUpdate event) {
         mc.world.getPlayers().stream()
                 .filter(this::isValidPlayer)

@@ -3,7 +3,6 @@ package net.minecraft.client.renderer.texture;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.realmsclient.RealmsMainScreen;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -260,7 +259,6 @@ public class TextureManager implements IFutureReloadListener, ITickable, AutoClo
         return CompletableFuture.allOf(MainMenuScreen.loadAsync(this, backgroundExecutor), this.loadAsync(Widget.WIDGETS_LOCATION, backgroundExecutor)).thenCompose(stage::markCompleteAwaitingOthers).thenAcceptAsync((p_lambda$reload$4_3_) ->
         {
             MissingTextureSprite.getDynamicTexture();
-            RealmsMainScreen.func_227932_a_(this.resourceManager);
             Set<Entry<ResourceLocation, Texture>> set = new HashSet<>(this.mapTextureObjects.entrySet());
             Iterator<Entry<ResourceLocation, Texture>> iterator1 = set.iterator();
 

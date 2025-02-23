@@ -2,7 +2,8 @@ package net.minecraft.client.multiplayer;
 
 import com.mojang.datafixers.util.Pair;
 import ru.novacore.NovaCore;
-import ru.novacore.events.AttackEvent;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.player.AttackEvent;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.combat.AttackAura;
 import ru.novacore.functions.impl.player.NoInteract;
@@ -368,7 +369,7 @@ public class PlayerController {
      */
     public void attackEntity(PlayerEntity playerIn, Entity targetEntity) {
         event.entity = targetEntity;
-        NovaCore.getInstance().getEventBus().post(event);
+        EventSystem.call(event);
 
         this.syncCurrentPlayItem();
 

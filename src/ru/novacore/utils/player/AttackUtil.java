@@ -1,6 +1,7 @@
 package ru.novacore.utils.player;
 
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.command.friends.FriendStorage;
 import ru.novacore.utils.client.IMinecraft;
 import net.minecraft.entity.Entity;

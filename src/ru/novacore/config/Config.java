@@ -3,6 +3,7 @@ package ru.novacore.config;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.functions.settings.Setting;
 //.functions.settings.impl.*;
 import ru.novacore.functions.settings.impl.*;

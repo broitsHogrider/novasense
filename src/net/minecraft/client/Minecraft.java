@@ -21,8 +21,9 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventChangeWorld;
-import ru.novacore.events.TickEvent;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.render.EventChangeWorld;
+import ru.novacore.events.other.TickEvent;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.combat.AttackAura;
 import ru.novacore.functions.impl.misc.SelfDestruct;
@@ -473,7 +474,7 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
         if (selfDestruct.unhooked) {
             this.mainWindow.setWindowTitle(getWindowTitle());
         } else {
-            this.mainWindow.setWindowTitle(NovaCore.CLIENT_NAME + " version -> " + NovaCore.BUILD_DATE);
+            this.mainWindow.setWindowTitle(NovaCore.CLIENT_NAME + NovaCore.BUILD_DATE);
         }
     }
 
@@ -1059,7 +1060,7 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
     TickEvent tickEvent = new TickEvent();
 
     private void tick(boolean isDebug, @Nullable LongTickDetector detector) {
-        NovaCore.getInstance().getEventBus().post(tickEvent);
+        EventSystem.call(tickEvent);
 
         if (isDebug) {
             if (!this.gameTimeTracker.func_233505_a_()) {
@@ -1542,7 +1543,7 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
         }
 
         if (this.world != null) {
-            NovaCore.getInstance().getEventBus().post(player.tick);
+            EventSystem.call(player.tick);
 
             this.profiler.endStartSection("gameRenderer");
 
@@ -2023,7 +2024,7 @@ public class Minecraft extends RecursiveEventLoop<Runnable> implements ISnooperI
             SkullTileEntity.setSessionService(minecraftsessionservice);
             PlayerProfileCache.setOnlineMode(false);
         }
-        NovaCore.getInstance().getEventBus().post(new EventChangeWorld());
+        EventSystem.call(new EventChangeWorld());
     }
 
     public void unloadWorld() {

@@ -2,12 +2,12 @@ package net.minecraft.client.gui.screen;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.misc.SelfDestruct;
 import ru.novacore.ui.mainmenu.MainScreen;
 import net.minecraft.client.gui.advancements.AdvancementsScreen;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.realms.RealmsBridgeScreen;
 import net.minecraft.util.SharedConstants;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -91,9 +91,6 @@ public class IngameMenuScreen extends Screen {
 
             if (flag) {
                 this.minecraft.displayGuiScreen(selfDestruct.unhooked ? new MainMenuScreen() : new MainScreen());
-            } else if (flag1) {
-                RealmsBridgeScreen realmsbridgescreen = new RealmsBridgeScreen();
-                realmsbridgescreen.func_231394_a_(selfDestruct.unhooked ? new MainMenuScreen() : new MainScreen());
             } else {
                 this.minecraft.displayGuiScreen(new MultiplayerScreen(selfDestruct.unhooked ? new MainMenuScreen() : new MainScreen()));
             }

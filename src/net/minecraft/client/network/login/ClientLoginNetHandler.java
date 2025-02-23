@@ -27,8 +27,6 @@ import net.minecraft.network.login.server.SDisconnectLoginPacket;
 import net.minecraft.network.login.server.SEnableCompressionPacket;
 import net.minecraft.network.login.server.SEncryptionRequestPacket;
 import net.minecraft.network.login.server.SLoginSuccessPacket;
-import net.minecraft.realms.DisconnectedRealmsScreen;
-import net.minecraft.realms.RealmsScreen;
 import net.minecraft.util.CryptException;
 import net.minecraft.util.CryptManager;
 import net.minecraft.util.HTTPUtil;
@@ -143,14 +141,7 @@ public class ClientLoginNetHandler implements IClientLoginNetHandler
      */
     public void onDisconnect(ITextComponent reason)
     {
-        if (this.previousGuiScreen != null && this.previousGuiScreen instanceof RealmsScreen)
-        {
-            this.mc.displayGuiScreen(new DisconnectedRealmsScreen(this.previousGuiScreen, DialogTexts.CONNECTION_FAILED, reason));
-        }
-        else
-        {
-            this.mc.displayGuiScreen(new DisconnectedScreen(this.previousGuiScreen, DialogTexts.CONNECTION_FAILED, reason));
-        }
+        this.mc.displayGuiScreen(new DisconnectedScreen(this.previousGuiScreen, DialogTexts.CONNECTION_FAILED, reason));
     }
 
     /**

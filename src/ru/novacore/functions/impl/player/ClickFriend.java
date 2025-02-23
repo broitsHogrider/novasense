@@ -1,7 +1,7 @@
 package ru.novacore.functions.impl.player;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.EventKey;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.input.EventKey;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.settings.impl.BindSetting;
@@ -16,7 +16,7 @@ public class ClickFriend extends Function {
     public ClickFriend() {
         addSettings(throwKey);
     }
-    @Subscribe
+    @EventHandler
     public void onKey(EventKey e) {
         if (e.getKey() == throwKey.get() && mc.pointedEntity instanceof PlayerEntity) {
 

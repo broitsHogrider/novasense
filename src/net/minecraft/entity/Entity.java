@@ -4,9 +4,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventStartRiding;
-import ru.novacore.events.MovingEvent;
-import ru.novacore.events.PostMoveEvent;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.player.EventStartRiding;
+import ru.novacore.events.player.MovingEvent;
+import ru.novacore.events.player.PostMoveEvent;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.combat.AttackAura;
 import ru.novacore.functions.impl.combat.Hitbox;
@@ -598,7 +599,7 @@ public abstract class Entity implements INameable, ICommandSource {
 
                 MovingEvent move = new MovingEvent(fromPosition, predictedPosition, pos, onGround, collidedHorizontally,
                         collidedVertically, bb);
-                NovaCore.getInstance().getEventBus().post(move);
+                EventSystem.call(move);
 
                 pos = move.getMotion();
                 ignoreHorizontal = move.isIgnoreHorizontal();
@@ -622,7 +623,7 @@ public abstract class Entity implements INameable, ICommandSource {
             if (this instanceof ClientPlayerEntity) {
                 double deltaX = getPosX() - preX, deltaZ = getPosZ() - preZ;
                 PostMoveEvent post = new PostMoveEvent(Math.sqrt(deltaX * deltaX + deltaZ * deltaZ));
-                NovaCore.getInstance().getEventBus().post(post);
+                EventSystem.call(post);
             }
 
             BlockPos blockpos = this.getOnPosition();
@@ -1995,7 +1996,7 @@ public abstract class Entity implements INameable, ICommandSource {
     }
 
     public boolean startRiding(Entity entityIn, boolean force) {
-        NovaCore.getInstance().getEventBus().post(new EventStartRiding(entityIn));
+        EventSystem.call(new EventStartRiding(entityIn));
 
         for (Entity entity = entityIn; entity.ridingEntity != null; entity = entity.ridingEntity) {
             if (entity.ridingEntity == this) {

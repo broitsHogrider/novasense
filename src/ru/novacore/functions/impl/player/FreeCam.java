@@ -1,9 +1,9 @@
 package ru.novacore.functions.impl.player;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.EventLivingUpdate;
-import ru.novacore.events.EventMotion;
-import ru.novacore.events.EventPacket;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.player.EventLivingUpdate;
+import ru.novacore.events.input.EventMotion;
+import ru.novacore.events.server.EventPacket;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -33,7 +33,7 @@ public class FreeCam extends Function {
 
     private RemoteClientPlayerEntity fakePlayer;
 
-    @Subscribe
+    @EventHandler
     public void onLivingUpdate(EventLivingUpdate e) {
         if (mc.player != null) {
             mc.player.noClip = true;
@@ -49,7 +49,7 @@ public class FreeCam extends Function {
         }
     }
 
-    @Subscribe
+    @EventHandler
     public void onMotion(EventMotion e) {
 
         if (mc.player.ticksExisted % 10 == 0) {
@@ -61,7 +61,7 @@ public class FreeCam extends Function {
         }
     }
 
-    @Subscribe
+    @EventHandler
     public void onPacket(EventPacket e) {
         if (mode.get()) {
             if (mc.player != null && mc.world != null && !(mc.currentScreen instanceof DownloadTerrainScreen)) {

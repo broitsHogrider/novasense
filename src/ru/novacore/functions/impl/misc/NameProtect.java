@@ -1,12 +1,10 @@
 package ru.novacore.functions.impl.misc;
 
-import com.google.common.eventbus.Subscribe;
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.EventSystem;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
-import ru.novacore.functions.settings.impl.StringSetting;
 import net.minecraft.client.Minecraft;
 
 @FunctionInfo(name = "NameProtect", category = Category.Misc)

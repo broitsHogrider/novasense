@@ -1,16 +1,13 @@
 package ru.novacore.functions.impl.render;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import com.mojang.blaze3d.platform.GlStateManager;
-import ru.novacore.command.friends.FriendStorage;
-import ru.novacore.events.EventDisplay;
+import ru.novacore.events.render.EventDisplay;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
 import ru.novacore.utils.math.MathUtil;
-import ru.novacore.utils.player.MoveUtils;
 import ru.novacore.utils.player.PlayerUtils;
-import ru.novacore.utils.render.ColorUtils;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.gui.screen.inventory.InventoryScreen;
 import net.minecraft.client.settings.PointOfView;
@@ -18,8 +15,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.opengl.GL11;
 import ru.novacore.utils.render.RenderUtils;
-
-import java.awt.*;
 
 @FunctionInfo(name = "Arrows", category = Category.Render)
 public class Pointers extends Function {
@@ -32,7 +27,7 @@ public class Pointers extends Function {
     private float animatedYaw;
     private float animatedPitch;
 
-    @Subscribe
+    @EventHandler
     public void onDisplay(EventDisplay e) {
         if (mc.player == null || mc.world == null || e.getType() != EventDisplay.Type.PRE) {
             return;
@@ -49,9 +44,6 @@ public class Pointers extends Function {
             size += 80;
         }
 
-        if (MoveUtils.isMoving()) {
-            size += 10;
-        }
         animationStep = MathUtil.fast(animationStep, size, 6);
         if (mc.gameSettings.getPointOfView() == PointOfView.FIRST_PERSON) {
             for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
@@ -87,8 +79,8 @@ public class Pointers extends Function {
                 GlStateManager.popMatrix();
             }
         }
-        lastYaw = mc.player.rotationYaw;
-        lastPitch = mc.player.rotationPitch;
+//        lastYaw = mc.player.rotationYaw;
+//        lastPitch = mc.player.rotationPitch;
     }
 
     public static void drawTriangle() {

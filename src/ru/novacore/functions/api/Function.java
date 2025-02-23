@@ -2,6 +2,7 @@ package ru.novacore.functions.api;
 
 import jdk.jfr.Description;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.functions.impl.misc.ClientSounds;
 import ru.novacore.functions.settings.Setting;
 import ru.novacore.utils.client.ClientUtil;
@@ -49,12 +50,12 @@ public abstract class Function implements IMinecraft {
 
     public void onEnable() {
         animation.animate(1, 0.25f, Easings.CIRC_OUT);
-        NovaCore.getInstance().getEventBus().register(this);
+        EventSystem.register(this);
     }
 
     public void onDisable() {
         animation.animate(0, 0.25f, Easings.CIRC_OUT);
-        NovaCore.getInstance().getEventBus().unregister(this);
+        EventSystem.unregister(this);
     }
 
 

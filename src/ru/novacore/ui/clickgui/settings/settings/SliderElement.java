@@ -4,6 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector4f;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.functions.settings.impl.SliderSetting;
 import ru.novacore.ui.clickgui.settings.Element;
 import ru.novacore.ui.clickgui.settings.FunctionElement;
@@ -39,15 +40,13 @@ public class SliderElement extends Element {
         animation = MathUtil.lerp(animation, sliderWidth, 10);
         Vector4i vector4i = new Vector4i(styleManager.getCurrentStyle().getFirstColor().getRGB(), styleManager.getCurrentStyle().getFirstColor().getRGB(), styleManager.getCurrentStyle().getSecondColor().getRGB(), styleManager.getCurrentStyle().getSecondColor().getRGB());
 
-        RenderUtils.Render2D.drawShadow(x + 5, y + 18, animation + 3, 2,10, vector4i.x, vector4i.y, vector4i.z, vector4i.w);
         RenderUtils.Render2D.drawGradientRound(x + 5, y + 18, 125, 2, new Vector4f(1, 1, 1, 1), ColorUtils.rgba(10, 10, 10, 120), ColorUtils.rgba(10, 10, 10, 120), ColorUtils.rgba(10, 10, 10, 120), ColorUtils.rgba(10, 10, 10, 120));
         RenderUtils.Render2D.drawGradientRound(x + 5, y + 18, animation + 3, 2, new Vector4f(1, 1, 1, 1),vector4i.x, vector4i.y, vector4i.z, vector4i.w);
-        RenderUtils.Render2D.drawShadowCircle(MathHelper.clamp(x + 7.5f + animation, x + 0.5f, x + 130.5f), y + 19f, 5, ColorUtils.rgb(230, 230, 230));
-        RenderUtils.Render2D.drawCircle(MathHelper.clamp(x + 7.5f + animation, x + 0.5f, x + 130.5f), y + 19f, 5, ColorUtils.rgb(230, 230, 230));
+        RenderUtils.Render2D.drawRoundCircle(MathHelper.clamp(x + 7.5f + animation, x + 0.5f, x + 130.5f), y + 19f, 5, ColorUtils.rgb(230, 230, 230));
 
         Scissor.push();
         Scissor.setFromComponentCoordinates(x + 5, y + 6.5f, (int) (width - 30 - Fonts.interMedium.getWidth(String.valueOf(set.get()), 6)), 10);
-        Fonts.interMedium.drawText(matrixStack, set.getName() + ":", x + 5, y + 6.5f, -1, 6);
+        Fonts.interMedium.drawText(matrixStack, set.getName(), x + 5, y + 6.5f, -1, 6);
         Scissor.unset();
         Scissor.pop();
         Fonts.interMedium.drawText(matrixStack, String.valueOf(set.get()), x + width - 5 - Fonts.interMedium.getWidth(String.valueOf(set.get()), 6), y + 6.5f, -1, 6);

@@ -1,6 +1,5 @@
 package ru.novacore;
 
-import com.google.common.eventbus.EventBus;
 import com.jagrosh.discordipc.IPCClient;
 import com.jagrosh.discordipc.IPCListener;
 import com.jagrosh.discordipc.entities.Packet;
@@ -21,7 +20,8 @@ import ru.novacore.command.impl.feature.*;
 import ru.novacore.command.staffs.StaffStorage;
 import ru.novacore.config.ConfigStorage;
 import ru.novacore.config.LastAccountConfig;
-import ru.novacore.events.EventKey;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.input.EventKey;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.ui.altmanager.AltConfig;
@@ -53,8 +53,8 @@ public class NovaCore {
 
     public static UserData userData = new UserData("hogrider", 1);
     public boolean playerOnServer = false;
-    public static final String CLIENT_NAME = "NovaCore 1.16.5";
-    public static final String BUILD_DATE = "#16022025";
+    public static final String CLIENT_NAME = "NovaCore Moon | ";
+    public static final String BUILD_DATE = "#21022025";
 
 
     // Экземпляр Novacore
@@ -72,8 +72,9 @@ public class NovaCore {
     private LastAccountConfig lastAccountConfig;
     private NotificationManager notificationManager;
     private AltConfig altConfig;
-    // Менеджер событий и скриптов
-    private final EventBus eventBus = new EventBus();
+    // Менеджер событий
+    private final EventSystem eventSystem = new EventSystem();
+
     // Директории
     private final File clientDir = new File(Minecraft.getInstance().gameDir + "\\novacore");
     private final File filesDir = new File(Minecraft.getInstance().gameDir + "\\novacore\\files");
@@ -175,7 +176,7 @@ public class NovaCore {
         DragManager.load();
         dropDown = new Panel();
 
-        eventBus.register(this);
+        EventSystem.register(this);
     }
 
     private final EventKey eventKey = new EventKey(-1);
@@ -184,7 +185,7 @@ public class NovaCore {
         if (functionRegistry.getSelfDestruct().unhooked) return;
         eventKey.setKey(key);
 
-        eventBus.post(eventKey);
+        EventSystem.call(eventKey);
 
         macroManager.onKeyPressed(key);
 
@@ -227,6 +228,7 @@ public class NovaCore {
         StyleFactory styleFactory = new StyleFactoryImpl();
         List<Style> styles = new ArrayList<>();
 
+        styles.add(styleFactory.createStyle("Новогодний", new Color(239, 59, 54), new Color(255, 255, 255)));
         styles.add(styleFactory.createStyle("Космический", new Color(0, 97, 255), new Color(96, 239, 255)));
         styles.add(styleFactory.createStyle("Прикольный", new Color(89, 92, 255), new Color(198, 248, 255)));
         styles.add(styleFactory.createStyle("Приятный", new Color(64, 201, 255), new Color(232, 28, 255)));

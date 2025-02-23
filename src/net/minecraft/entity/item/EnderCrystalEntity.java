@@ -1,7 +1,8 @@
 package net.minecraft.entity.item;
 
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventSpawnEntity;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.player.EventSpawnEntity;
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -32,13 +33,13 @@ public class EnderCrystalEntity extends Entity {
         super(p_i50231_1_, world);
         this.preventEntitySpawning = true;
         this.innerRotation = this.rand.nextInt(100000);
-        NovaCore.getInstance().getEventBus().post(new EventSpawnEntity(this));
+        EventSystem.call(new EventSpawnEntity(this));
     }
 
     public EnderCrystalEntity(World worldIn, double x, double y, double z) {
         this(EntityType.END_CRYSTAL, worldIn);
         this.setPosition(x, y, z);
-        NovaCore.getInstance().getEventBus().post(new EventSpawnEntity(this));
+        EventSystem.call(new EventSpawnEntity(this));
 
     }
 

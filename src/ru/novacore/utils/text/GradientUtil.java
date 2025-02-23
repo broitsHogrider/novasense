@@ -1,6 +1,7 @@
 package ru.novacore.utils.text;
 
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.ui.styles.StyleManager;
 import ru.novacore.utils.render.ColorUtils;
 

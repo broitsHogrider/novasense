@@ -7,6 +7,7 @@ import com.mojang.authlib.properties.PropertyMap.Serializer;
 import com.mojang.blaze3d.Empty3i;
 import com.mojang.blaze3d.systems.RenderSystem;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;

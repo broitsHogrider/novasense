@@ -3,16 +3,7 @@ package net.minecraft.block;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import ru.novacore.NovaCore;
-import ru.novacore.events.BreakEvent;
-import ru.novacore.events.PlaceObsidianEvent;
 import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
-
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Stream;
-import javax.annotation.Nullable;
-
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -20,11 +11,7 @@ import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.monster.piglin.PiglinTasks;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.loot.LootContext;
 import net.minecraft.loot.LootParameters;
 import net.minecraft.state.StateContainer;
@@ -32,12 +19,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockVoxelShape;
-import net.minecraft.util.Direction;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ObjectIntIdentityMap;
-import net.minecraft.util.Util;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.VoxelShape;
@@ -47,15 +29,17 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
+import net.minecraft.world.*;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.other.PlaceObsidianEvent;
+
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Stream;
 
 public class Block extends AbstractBlock implements IItemProvider {
     protected static final Logger LOGGER = LogManager.getLogger();
@@ -257,7 +241,6 @@ public class Block extends AbstractBlock implements IItemProvider {
      * Called after a player destroys this Block - the posiiton pos may no longer hold the state indicated.
      */
     public void onPlayerDestroy(IWorld worldIn, BlockPos pos, BlockState state) {
-        NovaCore.getInstance().getEventBus().post(new BreakEvent());
     }
 
     public static List<ItemStack> getDrops(BlockState state, ServerWorld worldIn, BlockPos pos, @Nullable TileEntity tileEntityIn) {
@@ -372,7 +355,7 @@ public class Block extends AbstractBlock implements IItemProvider {
         if (state.getBlock() == Blocks.OBSIDIAN) {
             placeObsidianEvent.setBlock(this);
             placeObsidianEvent.setPos(pos);
-            NovaCore.getInstance().getEventBus().post(placeObsidianEvent);
+            EventSystem.call(placeObsidianEvent);
         }
 
     }

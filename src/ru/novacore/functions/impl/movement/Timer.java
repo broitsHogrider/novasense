@@ -1,7 +1,7 @@
 package ru.novacore.functions.impl.movement;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -16,7 +16,7 @@ public class Timer extends Function {
         addSettings(speed);
     }
 
-    @Subscribe
+    @EventHandler
     private void onUpdate(EventUpdate e) {
         mc.timer.timerSpeed = speed.get();
     }

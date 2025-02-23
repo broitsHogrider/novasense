@@ -1,9 +1,9 @@
 package ru.novacore.functions.impl.render;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import com.mojang.blaze3d.platform.GlStateManager;
-import ru.novacore.events.JumpEvent;
-import ru.novacore.events.WorldEvent;
+import ru.novacore.events.player.JumpEvent;
+import ru.novacore.events.render.WorldEvent;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -27,14 +27,14 @@ public class JumpCircle extends Function {
         addSettings(sizeSlider);
     }
 
-    @Subscribe
+    @EventHandler
     private void onJump(JumpEvent e) {
         circles.add(new Circle(mc.player.getPositon(mc.getRenderPartialTicks()).add(0, 0.05, 0)));
     }
 
     private final ResourceLocation circle = new ResourceLocation("novacore/images/circle.png");
 
-    @Subscribe
+    @EventHandler
     private void onRender(WorldEvent e) {
 
         GlStateManager.pushMatrix();

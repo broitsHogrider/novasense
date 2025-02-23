@@ -3,7 +3,8 @@ package net.minecraft.entity.projectile;
 import com.google.common.collect.Lists;
 
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventDamageReceive;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.player.EventDamageReceive;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.util.Arrays;
 import java.util.List;
@@ -215,8 +216,7 @@ public abstract class AbstractArrowEntity extends ProjectileEntity {
                 if (raytraceresult != null && !flag) {
                     if (entityraytraceresult != null && raytraceresult.getType() == RayTraceResult.Type.ENTITY
                             && entityraytraceresult.getEntity() instanceof ClientPlayerEntity) {
-                        NovaCore.getInstance().getEventBus()
-                                .post(new EventDamageReceive(EventDamageReceive.DamageType.ARROW));
+                        EventSystem.call(new EventDamageReceive(EventDamageReceive.DamageType.ARROW));
                     }
 
                     this.onImpact(raytraceresult);

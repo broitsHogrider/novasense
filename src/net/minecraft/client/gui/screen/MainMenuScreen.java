@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.RenderSkybox;
 import net.minecraft.client.renderer.RenderSkyboxCube;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.realms.RealmsBridgeScreen;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SharedConstants;
@@ -162,8 +161,6 @@ public class MainMenuScreen extends Screen {
         this.minecraft.setConnectedToRealms(false);
 
         if (this.minecraft.gameSettings.realmsNotifications && !this.hasCheckedForRealmsNotification) {
-            RealmsBridgeScreen realmsbridgescreen = new RealmsBridgeScreen();
-            this.realmsNotification = realmsbridgescreen.func_239555_b_(this);
             this.hasCheckedForRealmsNotification = true;
         }
 
@@ -201,7 +198,6 @@ public class MainMenuScreen extends Screen {
         }, button$itooltip))).active = flag;
         (this.addButton(new Button(this.width / 2 - 100, yIn + rowHeightIn * 2, 200, 20, new TranslationTextComponent("menu.online"), (p_lambda$addSingleplayerMultiplayerButtons$7_1_) ->
         {
-            this.switchToRealms();
         }, button$itooltip))).active = flag;
 
         if (Reflector.ModListScreen_Constructor.exists() && this.buttons.size() > 0) {
@@ -253,12 +249,6 @@ public class MainMenuScreen extends Screen {
         }
     }
 
-    private void switchToRealms() {
-        RealmsBridgeScreen realmsbridgescreen = new RealmsBridgeScreen();
-        realmsbridgescreen.func_231394_a_(this);
-    }
-
-    boolean start = false;
 
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         if (this.firstRenderTime == 0L && this.showFadeInAnimation) {

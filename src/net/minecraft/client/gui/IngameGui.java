@@ -9,8 +9,9 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventCancelOverlay;
-import ru.novacore.events.EventDisplay;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.render.EventCancelOverlay;
+import ru.novacore.events.render.EventDisplay;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.render.Crosshair;
 import ru.novacore.utils.math.StopWatch;
@@ -178,7 +179,7 @@ public class IngameGui extends AbstractGui {
         mc.gameRenderer.setupOverlayRendering(2);
         eventDisplay.setType(EventDisplay.Type.PRE);
         if (eventDisplay.getType() == EventDisplay.Type.PRE) {
-            NovaCore.getInstance().getEventBus().post(eventDisplay);
+            EventSystem.call(eventDisplay);
         }
         mc.gameRenderer.setupOverlayRendering();
 
@@ -186,7 +187,7 @@ public class IngameGui extends AbstractGui {
         mc.gameRenderer.setupOverlayRendering(2);
         eventDisplay.setType(EventDisplay.Type.HIGH);
         if (eventDisplay.getType() == EventDisplay.Type.HIGH) {
-            NovaCore.getInstance().getEventBus().post(eventDisplay);
+            EventSystem.call(eventDisplay);
         }
         mc.gameRenderer.setupOverlayRendering();
 
@@ -328,7 +329,7 @@ public class IngameGui extends AbstractGui {
                 this.mc.getProfiler().endSection();
             }
             EventCancelOverlay eventCancelOverlay = new EventCancelOverlay(EventCancelOverlay.Overlays.TITLES);
-            NovaCore.getInstance().getEventBus().post(eventCancelOverlay);
+            EventSystem.call(eventCancelOverlay);
 
             if (eventCancelOverlay.isCancel()) {
                 eventCancelOverlay.open();
@@ -424,7 +425,7 @@ public class IngameGui extends AbstractGui {
         mc.gameRenderer.setupOverlayRendering(2);
         eventDisplay.setType(EventDisplay.Type.POST);
         if (eventDisplay.getType() == EventDisplay.Type.POST) {
-            NovaCore.getInstance().getEventBus().post(eventDisplay);
+            EventSystem.call(eventDisplay);
         }
         mc.gameRenderer.setupOverlayRendering();
 
@@ -803,7 +804,7 @@ public class IngameGui extends AbstractGui {
 
     private void func_238447_a_(MatrixStack p_238447_1_, ScoreObjective p_238447_2_) {
         EventCancelOverlay eventCancelOverlay = new EventCancelOverlay(EventCancelOverlay.Overlays.SCOREBOARD);
-        NovaCore.getInstance().getEventBus().post(eventCancelOverlay);
+        EventSystem.call(eventCancelOverlay);
 
         if (eventCancelOverlay.isCancel()) {
             eventCancelOverlay.open();

@@ -1,7 +1,7 @@
 package ru.novacore.functions.impl.movement;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -15,7 +15,7 @@ public class ElytraBoost extends Function {
         addSettings(modeSetting);
     }
 
-    @Subscribe
+    @EventHandler
     public void onUpdate(EventUpdate eventUpdate) {
 
     }

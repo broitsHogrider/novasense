@@ -1,7 +1,7 @@
 package ru.novacore.functions.impl.player;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.EventCalculateCooldown;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.player.EventCalculateCooldown;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -46,7 +46,7 @@ public class ItemCooldown extends Function {
     public HashMap<Item, Long> lastUseItemTime = new HashMap<>();
     public boolean isCooldown;
 
-    @Subscribe
+    @EventHandler
     public void onCalculateCooldown(EventCalculateCooldown e) {
         applyGoldenAppleCooldown(e);
     }

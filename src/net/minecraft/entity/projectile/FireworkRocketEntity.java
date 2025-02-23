@@ -31,6 +31,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.combat.AttackAura;
 import ru.novacore.functions.impl.movement.ElytraBoost;

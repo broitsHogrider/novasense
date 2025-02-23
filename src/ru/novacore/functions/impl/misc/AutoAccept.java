@@ -1,8 +1,8 @@
 package ru.novacore.functions.impl.misc;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import ru.novacore.command.friends.FriendStorage;
-import ru.novacore.events.EventPacket;
+import ru.novacore.events.server.EventPacket;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -20,7 +20,7 @@ public class AutoAccept extends Function {
         addSettings(onlyFriend);
     }
 
-    @Subscribe
+    @EventHandler
     public void onPacket(EventPacket e) {
         if (mc.player == null || mc.world == null) return;
 

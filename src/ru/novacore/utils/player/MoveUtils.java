@@ -1,7 +1,7 @@
 package ru.novacore.utils.player;
 
-import ru.novacore.events.EventInput;
-import ru.novacore.events.MovingEvent;
+import ru.novacore.events.input.EventInput;
+import ru.novacore.events.player.MovingEvent;
 import ru.novacore.utils.client.IMinecraft;
 import lombok.experimental.UtilityClass;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -62,12 +62,34 @@ public class MoveUtils implements IMinecraft {
         return Math.hypot(mc.player.getMotion().x, mc.player.getMotion().z);
     }
 
-    public void setMotion(final double speed) {
-        if (!isMoving())
-            return;
+    public static void setMotion(final double motion) {
+        double forward = mc.player.movementInput.moveForward;
+        double strafe = mc.player.movementInput.moveStrafe;
+        float yaw = mc.player.rotationYaw;
 
-        final double yaw = getDirection(true);
-        mc.player.setMotion(-Math.sin(yaw) * speed, mc.player.motion.y, Math.cos(yaw) * speed);
+        if (forward == 0 && strafe == 0) {
+            mc.player.motion.x = 0;
+            mc.player.motion.z = 0;
+        } else {
+            if (forward != 0) {
+                if (strafe > 0) {
+                    yaw += (float) (forward > 0 ? -45 : 45);
+                } else if (strafe < 0) {
+                    yaw += (float) (forward > 0 ? 45 : -45);
+                }
+                strafe = 0;
+                forward = (forward > 0) ? 1 : (forward < 0 ? -1 : 0);
+            }
+
+            // Вычисления для угла и его синуса и косинуса
+            float yawRad = (float) Math.toRadians(yaw + 90.0f);
+            float cosYaw = MathHelper.cos(yawRad);
+            float sinYaw = MathHelper.sin(yawRad);
+
+            // Расчет движения по осям
+            mc.player.motion.x = forward * motion * cosYaw + strafe * motion * sinYaw;
+            mc.player.motion.z = forward * motion * sinYaw - strafe * motion * cosYaw;
+        }
     }
 
     public static boolean isBlockUnder(float under) {

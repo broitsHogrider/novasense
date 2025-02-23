@@ -1,6 +1,5 @@
 package net.minecraft.client;
 
-import ru.novacore.NovaCore;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.INestedGuiEventHandler;
@@ -34,6 +33,7 @@ import net.optifine.Config;
 import net.optifine.reflect.Reflector;
 import net.optifine.shaders.Shaders;
 import net.optifine.shaders.gui.GuiShaderOptions;
+import ru.novacore.NovaCore;
 
 import javax.annotation.Nullable;
 import java.util.Locale;

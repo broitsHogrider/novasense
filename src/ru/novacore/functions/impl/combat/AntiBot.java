@@ -1,9 +1,9 @@
 package ru.novacore.functions.impl.combat;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import com.mojang.authlib.GameProfile;
-import ru.novacore.events.EventPacket;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.server.EventPacket;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -22,7 +22,7 @@ public class AntiBot extends Function {
     private final Set<UUID> susPlayers = new ConcurrentSet<>();
     private static final Map<UUID, Boolean> botsMap = new HashMap<>();
 
-    @Subscribe
+    @EventHandler
     private void onUpdate(EventUpdate e) {
         for (UUID susPlayer : susPlayers) {
             PlayerEntity entity = mc.world.getPlayerByUuid(susPlayer);
@@ -68,7 +68,7 @@ public class AntiBot extends Function {
         }
     }
 
-    @Subscribe
+    @EventHandler
     private void onPacket(EventPacket e) {
         if (e.getPacket() instanceof SPlayerListItemPacket p) {
             if (p.getAction() == SPlayerListItemPacket.Action.ADD_PLAYER) {

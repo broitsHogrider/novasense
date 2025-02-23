@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.utils.client.ClientUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -41,7 +42,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
-import ru.novacore.events.EventPacket;
+import ru.novacore.events.server.EventPacket;
 import via.ViaLoadingBase;
 import via.netty.handler.ViaDecoder;
 import via.netty.handler.ViaEncoder;
@@ -174,7 +175,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<IPacket<?>> {
         }
         if (this.channel.isOpen()) {
             receive.setPacket(p_channelRead0_2_);
-            NovaCore.getInstance().getEventBus().post(receive);
+            EventSystem.call(receive);
             if (receive.isCancel()) {
                 receive.open();
                 return;
@@ -210,7 +211,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<IPacket<?>> {
 
     public void sendPacket(IPacket<?> packetIn, @Nullable GenericFutureListener<? extends Future<? super Void>> p_201058_2_) {
         send.setPacket(packetIn);
-        NovaCore.getInstance().getEventBus().post(send);
+        EventSystem.call(send);
         if (send.isCancel()) {
             send.open();
             return;

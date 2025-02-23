@@ -8,12 +8,15 @@ import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
+import net.minecraft.client.Minecraft;
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventDamageReceive;
-import ru.novacore.events.JumpEvent;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.other.SwingAnimEvent;
+import ru.novacore.events.player.EventDamageReceive;
+import ru.novacore.events.player.JumpEvent;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.combat.AttackAura;
-import ru.novacore.functions.impl.misc.AntiPush;
+import ru.novacore.functions.impl.misc.NoPush;
 import ru.novacore.functions.impl.render.SwingAnimation;
 import ru.novacore.utils.math.MathUtil;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -1529,8 +1532,7 @@ public abstract class LivingEntity extends Entity {
             this.playFallSound();
             this.attackEntityFrom(DamageSource.FALL, (float) i);
             if (this instanceof ClientPlayerEntity) {
-                NovaCore.getInstance().getEventBus()
-                        .post(new EventDamageReceive(EventDamageReceive.DamageType.FALL));
+                EventSystem.call(new EventDamageReceive(EventDamageReceive.DamageType.FALL));
             }
             return true;
         } else {
@@ -1720,19 +1722,17 @@ public abstract class LivingEntity extends Entity {
      * progress indicator. Takes dig speed enchantments into account.
      */
     private int getArmSwingAnimationEnd() {
-        FunctionRegistry functionRegistry = NovaCore.getInstance().getFunctionRegistry();
-        SwingAnimation animation = functionRegistry.getSwingAnimation();
-
-        if (animation.isState() && this instanceof ClientPlayerEntity) {
-            return 25 - (animation.swingSpeed.get().intValue() * 2);
-        }
+        int animation;
         if (EffectUtils.hasMiningSpeedup(this)) {
-            return 6 - (1 + EffectUtils.getMiningSpeedup(this));
+            animation = 6 - (1 + EffectUtils.getMiningSpeedup(this));
         } else {
-            return this.isPotionActive(Effects.MINING_FATIGUE)
-                    ? 6 + (1 + this.getActivePotionEffect(Effects.MINING_FATIGUE).getAmplifier()) * 2
-                    : 6;
+            animation = this.isPotionActive(Effects.MINING_FATIGUE) ? 6 + (1 + this.getActivePotionEffect(Effects.MINING_FATIGUE).getAmplifier()) * 2 : 6;
         }
+        SwingAnimEvent event = new SwingAnimEvent(animation);
+        EventSystem.call(event);
+        animation = event.getAnimation();
+
+        return (int) (animation * Minecraft.getInstance().timer.timerSpeed);
     }
 
 
@@ -2132,7 +2132,7 @@ public abstract class LivingEntity extends Entity {
     protected void jump() {
 
         if (this instanceof ClientPlayerEntity entity) {
-            NovaCore.getInstance().getEventBus().post(jumpEvent);
+            EventSystem.call(jumpEvent);
         }
 
         float f = this.getJumpUpwardsMotion();
@@ -3071,8 +3071,8 @@ public abstract class LivingEntity extends Entity {
     @Override
     public boolean canBePushed() {
         FunctionRegistry functionRegistry = NovaCore.getInstance().getFunctionRegistry();
-        AntiPush antiPush = functionRegistry.getAntiPush();
-        if (antiPush.isState() && antiPush.getModes().getValueByName("Игроки").get() && this instanceof ClientPlayerEntity) {
+        NoPush noPush = functionRegistry.getNoPush();
+        if (noPush.isState() && noPush.getModes().getValueByName("Игроки").get() && this instanceof ClientPlayerEntity) {
             return false;
         }
         return this.isAlive() && !this.isSpectator() && !this.isOnLadder();

@@ -4,7 +4,10 @@ import com.google.common.collect.Sets;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
+import ru.hogoshi.Animation;
+import ru.hogoshi.util.Easings;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.misc.ItemScroller;
 import net.minecraft.client.Minecraft;
@@ -24,6 +27,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.glfw.GLFW;
+import ru.novacore.functions.impl.render.NoRender;
+import ru.novacore.utils.math.MathUtil;
 
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -33,6 +38,12 @@ public abstract class ContainerScreen<T extends Container> extends Screen implem
      * The location of the inventory background texture
      */
     public static final ResourceLocation INVENTORY_BACKGROUND = new ResourceLocation("textures/gui/container/inventory.png");
+
+
+    private Animation animation = new Animation();
+
+    FunctionRegistry functionRegistry = NovaCore.getInstance().getFunctionRegistry();
+    NoRender noRender = functionRegistry.getNoRender();
 
     /**
      * The X size of the inventory window in pixels.
@@ -120,6 +131,7 @@ public abstract class ContainerScreen<T extends Container> extends Screen implem
 
     @Override
     protected void init() {
+        animation.animate(1, 0.25f, Easings.QUINT_OUT);
         super.init();
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
@@ -129,6 +141,11 @@ public abstract class ContainerScreen<T extends Container> extends Screen implem
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         int i = this.guiLeft;
         int j = this.guiTop;
+        animation.update();
+        if (animation.getValue() < 0.1f) {
+            closeScreen();
+        }
+        MathUtil.scaleStart(guiLeft + (xSize / 2f), guiTop + (ySize / 2f), animation.getValue());
         this.drawGuiContainerBackgroundLayer(matrixStack, partialTicks, mouseX, mouseY);
         RenderSystem.disableRescaleNormal();
         RenderSystem.disableDepthTest();
@@ -152,8 +169,6 @@ public abstract class ContainerScreen<T extends Container> extends Screen implem
 
             if (this.isSlotSelected(slot, (double) mouseX, (double) mouseY) && slot.isEnabled()) {
 
-                FunctionRegistry functionRegistry = NovaCore.getInstance().getFunctionRegistry();
-                ItemScroller itemScroller = functionRegistry.getItemScroller();
                 if (NovaCore.getInstance().getFunctionRegistry().getItemScroller().isState()) {
                     if (GLFW.glfwGetMouseButton(Minecraft.getInstance().getMainWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS
                             && GLFW.glfwGetKey(Minecraft.getInstance().getMainWindow().getHandle(), GLFW.GLFW_KEY_LEFT_SHIFT) == GLFW.GLFW_PRESS
@@ -213,6 +228,7 @@ public abstract class ContainerScreen<T extends Container> extends Screen implem
 
         RenderSystem.popMatrix();
         RenderSystem.enableDepthTest();
+        MathUtil.scaleEnd();
     }
 
     protected void renderHoveredTooltip(MatrixStack matrixStack, int x, int y) {

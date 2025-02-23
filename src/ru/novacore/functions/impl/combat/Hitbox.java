@@ -1,12 +1,12 @@
 package ru.novacore.functions.impl.combat;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.AxisAlignedBB;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.FunctionInfo;
 import ru.novacore.functions.settings.impl.BooleanSetting;
 import ru.novacore.functions.settings.impl.SliderSetting;
@@ -18,7 +18,7 @@ public class Hitbox extends Function {
     public Hitbox() {
         addSettings(size,visible);
     }
-    @Subscribe
+    @EventHandler
     public void onUpdate(EventUpdate e) {
         if (!visible.get() || mc.player == null) {
             return;

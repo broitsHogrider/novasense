@@ -1,6 +1,6 @@
 package ru.novacore.functions.impl.combat;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.utils.math.StopWatch;
@@ -15,7 +15,7 @@ import net.minecraft.network.play.client.CHeldItemChangePacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.FunctionInfo;
 import ru.novacore.functions.settings.impl.BooleanSetting;
 
@@ -34,7 +34,7 @@ public class TriggerBot extends Function {
 
     private final StopWatch stopWatch = new StopWatch();
 
-    @Subscribe
+    @EventHandler
     public void onUpdate(EventUpdate e) {
         Entity entity = getValidEntity();
 

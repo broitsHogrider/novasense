@@ -22,6 +22,9 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.*;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.optifine.util.TextureUtils;
 import org.joml.Vector2d;
 import org.joml.Vector4i;
@@ -31,6 +34,7 @@ import org.lwjgl.opengl.GL30;
 import ru.novacore.ui.styles.Style;
 import ru.novacore.utils.client.IMinecraft;
 import ru.novacore.utils.math.MathUtil;
+import ru.novacore.utils.render.font.Fonts;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
@@ -635,6 +639,67 @@ public class RenderUtils implements IMinecraft {
             return texId;
         }
 
+        private static String replaceSymbols(String string) {
+            return string
+                    .replaceAll("⚡", "")
+                    .replaceAll("ᴀ", "a")
+                    .replaceAll("ʙ", "b")
+                    .replaceAll("ᴄ", "c")
+                    .replaceAll("ᴅ", "d")
+                    .replaceAll("ᴇ", "e")
+                    .replaceAll("ғ", "f")
+                    .replaceAll("ɢ", "g")
+                    .replaceAll("ʜ", "h")
+                    .replaceAll("ɪ", "i")
+                    .replaceAll("ᴊ", "j")
+                    .replaceAll("ᴋ", "k")
+                    .replaceAll("ʟ", "l")
+                    .replaceAll("ᴍ", "m")
+                    .replaceAll("ɴ", "n")
+                    .replaceAll("ᴏ", "o")
+                    .replaceAll("ᴘ", "p")
+                    .replaceAll("ǫ", "q")
+                    .replaceAll("ʀ", "r")
+                    .replaceAll("s", "s")
+                    .replaceAll("ᴛ", "t")
+                    .replaceAll("ᴜ", "u")
+                    .replaceAll("ᴠ", "v")
+                    .replaceAll("ᴡ", "w")
+                    .replaceAll("x", "x")
+                    .replaceAll("ʏ", "y")
+                    .replaceAll("ᴢ", "z");
+        }
+
+        public static void drawITextComponent(MatrixStack matrix, ITextComponent textComponent, double x, double y, int color, boolean shadow) {
+            float offset = 0;
+
+            for (ITextComponent component : textComponent.getSiblings()) {
+                String replacedComponent = TextFormatting.getTextWithoutFormattingCodes(replaceSymbols(component.getString()));
+                if (!component.getSiblings().isEmpty()) {
+                    float charoff = 0;
+                    for (ITextComponent charComponent : component.getSiblings()) {
+                        String replacedCharComponent = TextFormatting.getTextWithoutFormattingCodes(replaceSymbols(charComponent.getString()));
+
+                        Fonts.sfMedium.drawText(matrix, replacedCharComponent, (float) (x + offset + charoff), (float) y, charComponent.getStyle().getColor() != null ? charComponent.getStyle().getColor().getColor() : color, 6f);
+                        charoff += Fonts.sfMedium.getWidth(replacedCharComponent, 6f);
+                    }
+                } else {
+                    Fonts.sfMedium.drawText(matrix, replacedComponent, (float) (x + offset), (float) y, component.getStyle().getColor() != null ? component.getStyle().getColor().getColor() : color, 6);
+                }
+                offset += Fonts.sfMedium.getWidth(replacedComponent, 6f);
+            }
+        }
+
+        public static float getComponentWidth(ITextComponent textComponent) {
+            float offset = 0;
+            for (ITextComponent component : textComponent.getSiblings()) {
+                String replacedComponent = replaceSymbols(component.getString());
+                offset += Fonts.sfMedium.getWidth(replacedComponent, 6f);
+            }
+            return offset;
+        }
+
+
         public static void drawCircle(float x, float y, float start, float end, float radius, float width, boolean filled) {
             float i;
             float endOffset;
@@ -815,9 +880,6 @@ public class RenderUtils implements IMinecraft {
         }
 
         public static void drawRectBuilding(double left, double top, double right, double bottom, int color) {
-            right += left;
-            bottom += top;
-
             if (left < right) {
                 double i = left;
                 left = right;
@@ -830,15 +892,15 @@ public class RenderUtils implements IMinecraft {
                 bottom = j;
             }
 
-            float f3 = (float) (color >> 24 & 255) / 255f;
-            float f = (float) (color >> 16 & 255) / 255f;
-            float f1 = (float) (color >> 8 & 255) / 255f;
-            float f2 = (float) (color & 255) / 255f;
-
-            buffer.pos(left, bottom, 0).color(f, f1, f2, f3).endVertex();
-            buffer.pos(right, bottom, 0).color(f, f1, f2, f3).endVertex();
-            buffer.pos(right, top, 0).color(f, f1, f2, f3).endVertex();
-            buffer.pos(left, top, 0).color(f, f1, f2, f3).endVertex();
+            float f3 = (float) (color >> 24 & 255) / 255.0F;
+            float f = (float) (color >> 16 & 255) / 255.0F;
+            float f1 = (float) (color >> 8 & 255) / 255.0F;
+            float f2 = (float) (color & 255) / 255.0F;
+            BufferBuilder bufferbuilder = Tessellator.getInstance().getBuffer();
+            bufferbuilder.pos(left, bottom, 0.0F).color(f, f1, f2, f3).endVertex();
+            bufferbuilder.pos(right, bottom, 0.0F).color(f, f1, f2, f3).endVertex();
+            bufferbuilder.pos(right, top, 0.0F).color(f, f1, f2, f3).endVertex();
+            bufferbuilder.pos(left, top, 0.0F).color(f, f1, f2, f3).endVertex();
         }
 
         public static void drawRectOutlineBuilding(double x, double y, double width, double height, double size, int color) {
@@ -1373,6 +1435,9 @@ public class RenderUtils implements IMinecraft {
         }
 
         public static Vector3d getEntityPosition(Entity entity, float interpolationFactor) {
+
+            if (entity == null) return new Vector3d(0,0, 0);
+
             double interpolatedX = MathUtil.interpolate(entity.getPosX(), entity.lastTickPosX, interpolationFactor) - mc.getRenderManager().info.getProjectedView().x;
             double interpolatedY = MathUtil.interpolate(entity.getPosY(), entity.lastTickPosY, interpolationFactor) - mc.getRenderManager().info.getProjectedView().y;
             double interpolatedZ = MathUtil.interpolate(entity.getPosZ(), entity.lastTickPosZ, interpolationFactor) - mc.getRenderManager().info.getProjectedView().z;

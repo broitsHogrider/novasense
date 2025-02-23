@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.item.*;
 import net.minecraft.network.play.client.CHeldItemChangePacket;
 import net.minecraft.network.play.client.CPlayerTryUseItemPacket;
-import ru.novacore.events.EventPacket;
+import ru.novacore.events.server.EventPacket;
 import ru.novacore.utils.client.IMinecraft;
 import lombok.Getter;
 import net.minecraft.block.Block;

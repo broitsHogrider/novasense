@@ -1,6 +1,7 @@
 package ru.novacore.command.impl;
 
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 //.command.*;
 import ru.novacore.command.*;
 import ru.novacore.functions.api.FunctionRegistry;

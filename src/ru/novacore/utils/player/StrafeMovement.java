@@ -1,6 +1,6 @@
 package ru.novacore.utils.player;
 
-import ru.novacore.events.MovingEvent;
+import ru.novacore.events.player.MovingEvent;
 import ru.novacore.utils.client.IMinecraft;
 import lombok.Getter;
 import lombok.Setter;

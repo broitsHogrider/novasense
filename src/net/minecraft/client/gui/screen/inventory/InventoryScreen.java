@@ -2,9 +2,13 @@ package net.minecraft.client.gui.screen.inventory;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import ru.hogoshi.Animation;
+import ru.hogoshi.util.Easings;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.misc.SelfDestruct;
+import ru.novacore.functions.impl.render.NoRender;
 import ru.novacore.utils.client.IMinecraft;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DisplayEffectsScreen;
@@ -24,6 +28,7 @@ import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import ru.novacore.utils.math.MathUtil;
 
 public class InventoryScreen extends DisplayEffectsScreen<PlayerContainer> implements IRecipeShownListener, IMinecraft {
     private static final ResourceLocation RECIPE_BUTTON_TEXTURE = new ResourceLocation("textures/gui/recipe_button.png");
@@ -57,8 +62,11 @@ public class InventoryScreen extends DisplayEffectsScreen<PlayerContainer> imple
         }
     }
 
+    Animation animation = new Animation();
+
     @Override
     protected void init() {
+        animation = animation.animate(1, 0.25f, Easings.EXPO_OUT);
         FunctionRegistry functionRegistry = NovaCore.getInstance().getFunctionRegistry();
 
         SelfDestruct selfDestruct = functionRegistry.getSelfDestruct();
@@ -107,7 +115,16 @@ public class InventoryScreen extends DisplayEffectsScreen<PlayerContainer> imple
 
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(matrixStack);
+        animation.update();
+        if (animation.getValue() < 0.1f) {
+            closeScreen();
+        }
+
+        NoRender noRender = NovaCore.getInstance().getFunctionRegistry().getNoRender();
+
+        if (!noRender.isState() && !noRender.element.getValueByName("Задний фон интерфейсов").get()) this.renderBackground(matrixStack);
+
+        MathUtil.scaleStart(guiLeft + (xSize / 2f), guiTop + (ySize / 2f), animation.getValue());
         this.hasActivePotionEffects = !this.recipeBookGui.isVisible();
 
         if (this.recipeBookGui.isVisible() && this.widthTooNarrow) {
@@ -123,6 +140,8 @@ public class InventoryScreen extends DisplayEffectsScreen<PlayerContainer> imple
         this.recipeBookGui.func_238924_c_(matrixStack, this.guiLeft, this.guiTop, mouseX, mouseY);
         this.oldMouseX = (float) mouseX;
         this.oldMouseY = (float) mouseY;
+        MathUtil.scaleEnd();
+
     }
 
     @Override

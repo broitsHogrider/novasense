@@ -1,13 +1,11 @@
 package ru.novacore.functions.impl.movement;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import lombok.Setter;
 import lombok.experimental.NonFinal;
 import net.minecraft.item.UseAction;
-import net.minecraft.potion.Effect;
 import net.minecraft.potion.Effects;
-import ru.novacore.events.EventUpdate;
-import ru.novacore.events.TickEvent;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -27,7 +25,7 @@ public class AutoSprint extends Function {
 
     boolean wasSprinting = false;
 
-    @Subscribe
+    @EventHandler
     public void onUpdate(EventUpdate event) {
         boolean canSprint = canStartSprinting();
 

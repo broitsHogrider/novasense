@@ -1,7 +1,7 @@
 package ru.novacore.functions.impl.movement;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -9,7 +9,7 @@ import ru.novacore.utils.player.MoveUtils;
 // by lapycha and artem
 @FunctionInfo(name = "DragonFly", category = Category.Movement)
 public class DragonFly extends Function {
-    @Subscribe
+    @EventHandler
     public void onUpdate(EventUpdate event) {
         if (event instanceof EventUpdate && DragonFly.mc.player.abilities.isFlying) {
             MoveUtils.setMotion(1.0);

@@ -1,8 +1,8 @@
 package ru.novacore.functions.impl.render;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 
-import ru.novacore.events.EventPacket;
+import ru.novacore.events.server.EventPacket;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -19,7 +19,7 @@ public class World extends Function {
     public World() {
         addSettings(time);
     }
-    @Subscribe
+    @EventHandler
     public void onPacket(EventPacket e) {
         if (e.getPacket() instanceof SUpdateTimePacket p) {
             if (time.get().equalsIgnoreCase("Day"))

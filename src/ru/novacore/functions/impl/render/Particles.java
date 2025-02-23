@@ -1,14 +1,15 @@
 package ru.novacore.functions.impl.render;
 
-import com.google.common.eventbus.Subscribe;
+import net.minecraft.util.math.BlockPos;
+import ru.novacore.events.EventHandler;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import lombok.Getter;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Vector3d;
-import ru.novacore.events.AttackEvent;
-import ru.novacore.events.Render3DPosedEvent;
+import ru.novacore.events.player.AttackEvent;
+import ru.novacore.events.render.Render3DPosedEvent;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -26,7 +27,7 @@ import static net.minecraft.client.renderer.WorldRenderer.frustum;
 @FunctionInfo(name = "Particles", category = Category.Render)
 public class Particles extends Function {
 
-    private final ModeSetting setting = new ModeSetting("Вид", "Сердечки", "Сердечки", "Орбизы", "Доллар", "Снежинки");
+    private final ModeSetting setting = new ModeSetting("Вид", "Сердечки", "Сердечки", "Орбизы", "Доллар", "Снежинки", "Звёздочки");
     private final SliderSetting value = new SliderSetting("Кол-во за удар", 20.0f, 1.0f, 50.0f, 1.0f);
     private final CopyOnWriteArrayList<Particle> particles = new CopyOnWriteArrayList<>();
 
@@ -41,7 +42,7 @@ public class Particles extends Function {
         return frustum.isBoundingBoxInFrustum(new AxisAlignedBB(pos.add(-0.2, -0.2, -0.2), pos.add(0.2, 0.2, 0.2)));
     }
 
-    @Subscribe
+    @EventHandler
     private void onUpdate(AttackEvent e) {
         if (e.entity == mc.player) return;
         if (e.entity instanceof LivingEntity livingEntity) {
@@ -51,9 +52,9 @@ public class Particles extends Function {
         }
     }
 
-    @Subscribe
+    @EventHandler
     private void onDisplay(Render3DPosedEvent e) {
-        MatrixStack matrixStack = e.getMatrix();
+        MatrixStack matrixStack = e.matrixStack;
         if (mc.player == null || mc.world == null) {
             return;
         }
@@ -87,7 +88,8 @@ public class Particles extends Function {
             case "Сердечки" -> "novacore/images/particle/heart.png";
             case "Снежинки" -> "novacore/images/particle/snowflake.png";
             case "Доллар" -> "novacore/images/particle/dollar.png";
-            case "Орбизы" -> "novacore/images/particle/glow.png";
+            case "Орбизы" -> "novacore/images/particle/firefly.png";
+            case "Звёздочки" -> "novacore/images/particle/star.png";
             default -> throw new IllegalStateException("Unexpected value: " + setting.get());
         };
 
@@ -98,19 +100,42 @@ public class Particles extends Function {
     private static class Particle {
         @Getter
         private Vector3d pos;
-        private final Vector3d end;
+        private final Vector3d initialMotion;
+        private Vector3d motion;
         private final long time;
         private float alpha;
 
         public Particle(Vector3d pos) {
             this.pos = pos;
-            this.end = pos.add(-ThreadLocalRandom.current().nextFloat(-3, 3), -ThreadLocalRandom.current().nextFloat(-3, 3), -ThreadLocalRandom.current().nextFloat(-3, 3));
+            this.initialMotion = new Vector3d(
+                    ThreadLocalRandom.current().nextFloat(-0.05f, 0.05f),
+                    ThreadLocalRandom.current().nextFloat(0.05f, 0.1f),
+                    ThreadLocalRandom.current().nextFloat(-0.05f, 0.05f)
+            );
+            this.motion = initialMotion;
             this.time = System.currentTimeMillis();
         }
 
         public void update() {
             alpha = MathUtil.fast(alpha, 1, 10);
-            pos = MathUtil.fast(pos, end, 0.5f);
+            pos = pos.add(motion);
+            motion = motion.scale(0.98); // Замедление
+            motion = new Vector3d(motion.x, motion.y - 0.003, motion.z); // Гравитация
+
+            // Проверка столкновений по Y
+            if (!mc.world.getBlockState(new BlockPos(pos.x, pos.y - 0.1, pos.z)).isAir()) {
+                motion = new Vector3d(motion.x, -motion.y * 0.85, motion.z); // Отскок с затуханием
+            }
+
+            // Проверка столкновений по X
+            if (!mc.world.getBlockState(new BlockPos(pos.x + motion.x, pos.y, pos.z)).isAir()) {
+                motion = new Vector3d(-motion.x * 0.85, motion.y, motion.z);
+            }
+
+            // Проверка столкновений по Z
+            if (!mc.world.getBlockState(new BlockPos(pos.x, pos.y, pos.z + motion.z)).isAir()) {
+                motion = new Vector3d(motion.x, motion.y, -motion.z * 0.85);
+            }
         }
     }
 }

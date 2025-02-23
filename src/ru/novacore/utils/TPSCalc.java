@@ -1,8 +1,9 @@
 package ru.novacore.utils;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventPacket;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.server.EventPacket;
 import lombok.Getter;
 import net.minecraft.network.play.server.SUpdateTimePacket;
 import net.minecraft.util.math.MathHelper;
@@ -16,10 +17,10 @@ public class TPSCalc {
     private long timestamp;
 
     public TPSCalc() {
-        NovaCore.getInstance().getEventBus().register(this);
+        EventSystem.register(this);
     }
 
-    @Subscribe
+    @EventHandler
     private void onPacket(EventPacket e) {
         if (e.getPacket() instanceof SUpdateTimePacket) {
             updateTPS();

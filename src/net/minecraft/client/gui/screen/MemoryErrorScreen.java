@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screen;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.misc.SelfDestruct;
 import ru.novacore.ui.mainmenu.MainScreen;

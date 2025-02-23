@@ -1,6 +1,6 @@
 package ru.novacore.events;
 
-public class CancelEvent {
+public class CancelEvent extends Event {
 
     private boolean isCancel;
 

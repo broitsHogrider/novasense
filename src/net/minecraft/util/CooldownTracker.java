@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import ru.novacore.NovaCore;
-import ru.novacore.events.EventCalculateCooldown;
-import ru.novacore.events.EventCooldown;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.player.EventCalculateCooldown;
+import ru.novacore.events.player.EventCooldown;
 import net.minecraft.item.Item;
 import net.minecraft.util.math.MathHelper;
 
@@ -24,7 +24,7 @@ public class CooldownTracker {
         Cooldown cooldowntracker$cooldown = this.cooldowns.get(itemIn);
 
         EventCalculateCooldown cooldown = new EventCalculateCooldown(itemIn);
-        NovaCore.getInstance().getEventBus().post(cooldown);
+        EventSystem.call(cooldown);
 
         if (cooldown.getCooldown() != 0) {
             return cooldown.getCooldown();
@@ -51,7 +51,7 @@ public class CooldownTracker {
                 if ((entry.getValue()).expireTicks <= this.ticks) {
                     eventCooldown.setItem(entry.getKey());
                     eventCooldown.setCooldownType(EventCooldown.CooldownType.REMOVED);
-                    NovaCore.getInstance().getEventBus().post(eventCooldown);
+                    EventSystem.call(eventCooldown);
                     iterator.remove();
                     this.notifyOnRemove(entry.getKey());
                 }
@@ -64,7 +64,7 @@ public class CooldownTracker {
     public void setCooldown(Item itemIn, int ticksIn) {
         eventCooldown.setItem(itemIn);
         eventCooldown.setCooldownType(EventCooldown.CooldownType.ADDED);
-        NovaCore.getInstance().getEventBus().post(eventCooldown);
+        EventSystem.call(eventCooldown);
         this.cooldowns.put(itemIn, new Cooldown(this.ticks, this.ticks + ticksIn));
         this.notifyOnSet(itemIn, ticksIn);
     }
@@ -72,7 +72,7 @@ public class CooldownTracker {
     public void removeCooldown(Item itemIn) {
         eventCooldown.setItem(itemIn);
         eventCooldown.setCooldownType(EventCooldown.CooldownType.REMOVED);
-        NovaCore.getInstance().getEventBus().post(eventCooldown);
+        EventSystem.call(eventCooldown);
         this.cooldowns.remove(itemIn);
         this.notifyOnRemove(itemIn);
     }

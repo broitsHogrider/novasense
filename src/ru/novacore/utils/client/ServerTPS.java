@@ -1,8 +1,9 @@
 package ru.novacore.utils.client;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventPacket;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.server.EventPacket;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.Arrays;
@@ -16,7 +17,7 @@ public class ServerTPS {
         this.index = 0;
         this.lastPacketTime = -1L;
         Arrays.fill(ticks, 0.0F);
-        NovaCore.getInstance().getEventBus().register(this);
+        EventSystem.register(this);
     }
 
     public float getTPS() {
@@ -40,7 +41,7 @@ public class ServerTPS {
         this.lastPacketTime = System.currentTimeMillis();
     }
 
-    @Subscribe
+    @EventHandler
     public void onPacket(EventPacket e) {
         update();
     }

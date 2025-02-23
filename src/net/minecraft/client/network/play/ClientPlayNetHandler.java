@@ -8,7 +8,8 @@ import com.ibm.icu.impl.Pair;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventCancelOverlay;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.render.EventCancelOverlay;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.misc.SelfDestruct;
 import ru.novacore.functions.impl.player.NoRotate;
@@ -76,8 +77,6 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
-import net.minecraft.realms.DisconnectedRealmsScreen;
-import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.IPackNameDecorator;
 import net.minecraft.scoreboard.*;
 import net.minecraft.stats.Stat;
@@ -768,12 +767,7 @@ public class ClientPlayNetHandler implements IClientPlayNetHandler {
         this.client.unloadWorld();
 
         if (this.guiScreenServer != null) {
-            if (this.guiScreenServer instanceof RealmsScreen) {
-                this.client
-                        .displayGuiScreen(new DisconnectedRealmsScreen(this.guiScreenServer, field_243491_b, reason));
-            } else {
-                this.client.displayGuiScreen(new DisconnectedScreen(this.guiScreenServer, field_243491_b, reason));
-            }
+            this.client.displayGuiScreen(new DisconnectedScreen(this.guiScreenServer, field_243491_b, reason));
         } else {
             FunctionRegistry functionRegistry = NovaCore.getInstance().getFunctionRegistry();
             SelfDestruct selfDestruct = functionRegistry.getSelfDestruct();
@@ -1008,7 +1002,7 @@ public class ClientPlayNetHandler implements IClientPlayNetHandler {
                 this.world.playSound(entity.getPosX(), entity.getPosY(), entity.getPosZ(), SoundEvents.ITEM_TOTEM_USE,
                         entity.getSoundCategory(), 1.0F, 1.0F, false);
                 EventCancelOverlay eventCancelOverlay = new EventCancelOverlay(EventCancelOverlay.Overlays.TOTEM);
-                NovaCore.getInstance().getEventBus().post(eventCancelOverlay);
+                EventSystem.call(eventCancelOverlay);
                 if (entity == this.client.player && !eventCancelOverlay.isCancel()) {
                     this.client.gameRenderer.displayItemActivation(getTotemItem(this.client.player));
                 }

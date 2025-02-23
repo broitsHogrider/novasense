@@ -3,7 +3,8 @@ package net.minecraft.entity.item;
 import javax.annotation.Nullable;
 
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventDamageReceive;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.player.EventDamageReceive;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -60,7 +61,7 @@ public class EnderPearlEntity extends ProjectileItemEntity
         super.onImpact(result);
         Entity entity = this.func_234616_v_();
         
-       NovaCore.getInstance().getEventBus().post(new EventDamageReceive(EventDamageReceive.DamageType.ENDER_PEARL));
+       EventSystem.call(new EventDamageReceive(EventDamageReceive.DamageType.ENDER_PEARL));
 
         for (int i = 0; i < 32; ++i)
         {

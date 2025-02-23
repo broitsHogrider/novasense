@@ -1,7 +1,7 @@
 package ru.novacore.functions.impl.render;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.WorldEvent;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.render.WorldEvent;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -33,7 +33,7 @@ public class StorageESP extends Function {
             new MobSpawnerTileEntity().getType(), new Color(112, 236, 166).getRGB()
     ));
 
-    @Subscribe
+    @EventHandler
     private void onRender(WorldEvent e) {
         for (TileEntity tile : mc.world.loadedTileEntityList) {
             if (!tiles.containsKey(tile.getType())) continue;

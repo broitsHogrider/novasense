@@ -1,9 +1,9 @@
 package ru.novacore.functions.impl.combat;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.EventMotion;
-import ru.novacore.events.EventUpdate;
-import ru.novacore.events.PlaceObsidianEvent;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.input.EventMotion;
+import ru.novacore.events.player.EventUpdate;
+import ru.novacore.events.other.PlaceObsidianEvent;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -44,7 +44,7 @@ public class AutoExplosion extends Function {
         addSettings(safeYourSelf);
     }
 
-    @Subscribe
+    @EventHandler
     public void onObsidianPlace(PlaceObsidianEvent e) {
         BlockPos obsidianPos = e.getPos();
 
@@ -86,7 +86,7 @@ public class AutoExplosion extends Function {
         }
     }
 
-    @Subscribe
+    @EventHandler
     private void onUpdate(EventUpdate e) {
         if (obsidianPos != null)
             findEnderCrystals(obsidianPos).forEach(this::attackCrystal);
@@ -95,7 +95,7 @@ public class AutoExplosion extends Function {
             if (!crystalEntity.isAlive()) reset();
     }
 
-    @Subscribe
+    @EventHandler
     private void onMotion(EventMotion e) {
         if (isValid(crystalEntity)) {
             rotationVector = MathUtil.rotationToEntity(crystalEntity);

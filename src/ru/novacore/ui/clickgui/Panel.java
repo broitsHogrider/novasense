@@ -7,21 +7,22 @@ import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector4f;
 import net.minecraft.util.text.StringTextComponent;
 import org.lwjgl.glfw.GLFW;
+import ru.hogoshi.Animation;
+import ru.hogoshi.util.Easings;
 import ru.novacore.NovaCore;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.ui.clickgui.settings.Element;
 import ru.novacore.ui.clickgui.settings.FunctionElement;
 import ru.novacore.ui.clickgui.theme.ThemeDrawing;
-import ru.novacore.utils.animations.Animation;
-import ru.novacore.utils.animations.Direction;
-import ru.novacore.utils.animations.impl.EaseBackIn;
 import ru.novacore.utils.client.ClientUtil;
 import ru.novacore.utils.client.IMinecraft;
 import ru.novacore.utils.client.Vec2i;
 import ru.novacore.utils.math.MathUtil;
-import ru.novacore.utils.math.Vector4i;
-import ru.novacore.utils.render.*;
+import ru.novacore.utils.render.ColorUtils;
+import ru.novacore.utils.render.RenderUtils;
+import ru.novacore.utils.render.Scissor;
+import ru.novacore.utils.render.Stencil;
 import ru.novacore.utils.render.font.Fonts;
 import ru.novacore.utils.text.GradientUtil;
 
@@ -37,7 +38,7 @@ public class Panel extends Screen implements IMinecraft {
     
     private final ArrayList<FunctionElement> elements = new ArrayList<>();
 
-    private final Animation animation = new EaseBackIn(400, (double)1.0F, 1.0F);
+    private Animation animation = new Animation();
 
     private Category category = Category.Combat;
 
@@ -60,6 +61,7 @@ public class Panel extends Screen implements IMinecraft {
 
     @Override
     protected void init() {
+        animation = animation.animate(1, 0.25f, Easings.QUINT_OUT);
         super.init();
         size = new Vector2f(400, 270);
         position = new Vector2f(window.scaledWidth() / 2f - size.x / 2f, window.scaledHeight() / 2f - size.y / 2f);
@@ -73,7 +75,14 @@ public class Panel extends Screen implements IMinecraft {
         mouseY = fixed.getY();
 
         mc.gameRenderer.setupOverlayRendering(2);
+        animation.update();
+
+        if (animation.getValue() < 0.1) {
+            closeScreen();
+        }
+        MathUtil.scaleStart(position.x + (size.x / 2f), position.y + (size.y / 2f), animation.getValue());
         renderPanel(matrixStack, mouseX, mouseY);
+        MathUtil.scaleEnd();
         scrollingOut = MathUtil.lerp(scrollingOut, scrolling, 10);
         mc.gameRenderer.setupOverlayRendering();
     }
@@ -91,8 +100,8 @@ public class Panel extends Screen implements IMinecraft {
         RenderUtils.Render2D.drawRectVerticalW(position.x + 100, position.y, 1, size.y, ColorUtils.rgb(31,33,43), ColorUtils.rgb(34,36,46));
         RenderUtils.Render2D.drawRectHorizontalW(position.x + 100, position.y + 30, size.x - 100, 1, ColorUtils.rgb(31,33,43), ColorUtils.rgb(34,36,46));
 
-        Fonts.sfMedium.drawText(matrixStack, category.name() + " / ", position.x + 115, position.y + 12.5f, -1, 10.5f);
-        Fonts.sfMedium.drawText(matrixStack," " + category.info, position.x + 115 + Fonts.sfMedium.getWidth(category.name() + " / ", 10.5f), position.y + 12.5f, ColorUtils.rgb(220, 220, 220), 10.5f);
+        Fonts.sfMedium.drawText(matrixStack, category.name() + " -- ", position.x + 115, position.y + 10.5f, -1, 10.5f);
+        Fonts.sfMedium.drawText(matrixStack,category.info, position.x + 115 + Fonts.sfMedium.getWidth(category.name() + " -- ", 10.5f), position.y + 10.5f, ColorUtils.rgb(220, 220, 220), 10.5f);
 
         Fonts.interMedium.drawCenteredText(matrixStack, GradientUtil.gradient(clientName), position.x + 100 / 2f, position.y + 16.5f, 8);
 
@@ -191,9 +200,15 @@ public class Panel extends Screen implements IMinecraft {
     }
 
     @Override
+    public void closeScreen() {
+        super.closeScreen();
+    }
+
+    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            mc.displayGuiScreen(null);
+            animation = animation.animate(0, 0.25f, Easings.QUINT_OUT);
+            return false;
         }
 
         for (FunctionElement FunctionElement : elements) {

@@ -1,8 +1,9 @@
 package net.minecraft.client.renderer;
 
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 
-import ru.novacore.events.CameraEvent;
+import ru.novacore.events.render.CameraEvent;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -49,7 +50,7 @@ public class ActiveRenderInfo {
         this.setDirection(renderViewEntity.getYaw(partialTicks), renderViewEntity.getPitch(partialTicks));
         this.setPosition(MathHelper.lerp((double)partialTicks, renderViewEntity.prevPosX, renderViewEntity.getPosX()), MathHelper.lerp((double)partialTicks, renderViewEntity.prevPosY, renderViewEntity.getPosY()) + (double)MathHelper.lerp(partialTicks, this.previousHeight, this.height), MathHelper.lerp((double)partialTicks, renderViewEntity.prevPosZ, renderViewEntity.getPosZ()));
         event.partialTicks = partialTicks;
-        NovaCore.getInstance().getEventBus().post(event);
+        EventSystem.call(event);
         
         if (thirdPersonIn)
         {

@@ -9,7 +9,6 @@ entityShadows:false
 forceUnicodeFont:false
 discrete_mouse_scroll:false
 invertYMouse:false
-realmsNotifications:true
 reducedDebugInfo:false
 snooperEnabled:false
 showSubtitles:false
@@ -22,7 +21,7 @@ mouseSensitivity:0.5
 fov:0.65
 screenEffectScale:1.0
 fovEffectScale:1.0
-gamma:0.0
+gamma:0.926056338028169
 renderDistance:8
 entityDistanceScaling:1.0
 guiScale:2
@@ -35,7 +34,7 @@ biomeBlendRadius:2
 renderClouds:false
 resourcePacks:["vanilla"]
 incompatibleResourcePacks:[]
-lastServer:play.legendsgrief.ru
+lastServer:direct.reallyworld.me
 lang:en_us
 chatVisibility:0
 chatOpacity:1.0
@@ -101,7 +100,7 @@ key_key.hotbar.7:key.keyboard.7
 key_key.hotbar.8:key.keyboard.8
 key_key.hotbar.9:key.keyboard.9
 key_of.key.zoom:key.keyboard.c
-soundCategory_master:0.18874173
+soundCategory_master:0.104304634
 soundCategory_music:0.0
 soundCategory_record:1.0
 soundCategory_weather:1.0

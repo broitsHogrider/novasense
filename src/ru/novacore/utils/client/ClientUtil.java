@@ -38,6 +38,11 @@ public class ClientUtil implements IMinecraft {
     public boolean isConnectedToServer(String ip) {
         return mc.getCurrentServerData() != null && mc.getCurrentServerData().serverIP != null && mc.getCurrentServerData().serverIP.contains(ip);
     }
+
+    public boolean isInReallyWorld() {
+        return isConnectedToServer("reallyworld") || isConnectedToServer("playrw");
+    }
+
     public boolean isPvP() {
         return pvpMode;
     }

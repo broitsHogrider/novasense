@@ -2,6 +2,7 @@ package ru.novacore.ui.altmanager;
 
 import net.minecraft.client.Minecraft;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 
 import java.io.*;
 import java.nio.file.Files;

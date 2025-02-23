@@ -1,7 +1,7 @@
 package ru.novacore.utils.player;
 
-import ru.novacore.events.EventDamageReceive;
-import ru.novacore.events.EventPacket;
+import ru.novacore.events.player.EventDamageReceive;
+import ru.novacore.events.server.EventPacket;
 import ru.novacore.utils.client.IMinecraft;
 import ru.novacore.utils.math.StopWatch;
 import lombok.Getter;

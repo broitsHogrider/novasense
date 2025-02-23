@@ -1,6 +1,7 @@
 package net.minecraft.client;
 
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.settings.KeyBinding;
@@ -9,8 +10,9 @@ import net.minecraft.client.util.MouseSmoother;
 import net.minecraft.client.util.NativeUtil;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFWDropCallback;
-import ru.novacore.events.EventMouseButtonPress;
-import ru.novacore.events.EventRotate;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.input.EventMouseButtonPress;
+import ru.novacore.events.player.EventRotate;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -123,7 +125,7 @@ public class MouseHelper {
                     NovaCore.getInstance().onKeyPressed(-100 + i);
 
                     eventMouseButtonPress.setButton(i);
-                    NovaCore.getInstance().getEventBus().post(eventMouseButtonPress);
+                    EventSystem.call(eventMouseButtonPress);
 
                     if (this.minecraft.player.isSpectator() && i == 2) {
                         this.minecraft.ingameGUI.getSpectatorGui().onMiddleClick();
@@ -313,7 +315,7 @@ public class MouseHelper {
                 eventRotate.setYaw(d2);
                 eventRotate.setPitch(d3 * (double) i);
 
-                NovaCore.getInstance().getEventBus().post(eventRotate);
+                EventSystem.call(eventRotate);
 
                 if (!eventRotate.isCancel()) {
                     this.minecraft.player.rotateTowards(eventRotate.getYaw(), eventRotate.getPitch());

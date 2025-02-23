@@ -1,7 +1,7 @@
 package ru.novacore.functions.impl.render;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -19,9 +19,9 @@ public class Item360 extends Function {
     public Item360() {
         addSettings(nulltarget,right,left);
     }
-   @Subscribe
-    public void onEvent(EventUpdate event) {
-
-    }
+//    @EventHandler
+//    public void onEvent(EventUpdate event) {
+//
+//    }
 }
 

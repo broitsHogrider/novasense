@@ -1,8 +1,8 @@
 package ru.novacore.functions.impl.player;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import net.minecraft.network.play.client.CPlayerPacket;
-import ru.novacore.events.EventPacket;
+import ru.novacore.events.server.EventPacket;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -13,7 +13,7 @@ public class NoRotate extends Function {
     private float targetPitch;
     private boolean isPacketSent;
 
-    @Subscribe
+    @EventHandler
     public void onPacket(EventPacket event) {
         if (event.isSend()) {
             if (this.isPacketSent) {

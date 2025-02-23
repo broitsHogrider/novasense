@@ -15,6 +15,7 @@ import static net.minecraft.util.math.MathHelper.clamp;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.concurrent.ThreadLocalRandom;
 
 @UtilityClass
 public class MathUtil implements IMinecraft {
@@ -22,22 +23,6 @@ public class MathUtil implements IMinecraft {
     public double interpolate(double current, double old, double scale) {
         return old + (current - old) * scale;
     }
-
-    public static Vector3d getVector(LivingEntity target) {
-        double wHalf = target.getWidth() / 2;
-
-        double yExpand = clamp(target.getPosYEye() - target.getPosY(), 0, target.getHeight());
-
-        double xExpand = clamp(mc.player.getPosX() - target.getPosX(), -wHalf, wHalf);
-        double zExpand = clamp(mc.player.getPosZ() - target.getPosZ(), -wHalf, wHalf);
-
-        return new Vector3d(
-                target.getPosX() - mc.player.getPosX() + xExpand,
-                target.getPosY() - mc.player.getPosYEye() + yExpand,
-                target.getPosZ() - mc.player.getPosZ() + zExpand
-        );
-    }
-
     public float calculateCorrectYawOffset(float yaw) {
         double xDiff = mc.player.getPosX() - mc.player.prevPosX;
         double zDiff = mc.player.getPosZ() - mc.player.prevPosZ;
@@ -142,6 +127,17 @@ public class MathUtil implements IMinecraft {
         double d1 = y1 - y2;
         double d2 = z1 - z2;
         return Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+    }
+
+    public double getRandom(double min, double max) {
+        if (min == max) {
+            return min;
+        } else if (min > max) {
+            final double d = min;
+            min = max;
+            max = d;
+        }
+        return ThreadLocalRandom.current().nextDouble() * (max - min) + min;
     }
 
     public double distance(double x1, double y1, double x2, double y2) {

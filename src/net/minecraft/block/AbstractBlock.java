@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.MapCodec;
 import ru.novacore.NovaCore;
 import ru.novacore.functions.api.FunctionRegistry;
-import ru.novacore.functions.impl.misc.AntiPush;
+import ru.novacore.functions.impl.misc.NoPush;
 import ru.novacore.functions.impl.player.AutoTool;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
@@ -720,10 +720,10 @@ public abstract class AbstractBlock {
 
         public boolean causesSuffocation(IBlockReader worldIn, BlockPos pos) {
             FunctionRegistry functionRegistry = NovaCore.getInstance().getFunctionRegistry();
-            AntiPush antiPush = functionRegistry.getAntiPush();
+            NoPush noPush = functionRegistry.getNoPush();
 
-            if (antiPush.isState()
-                    && antiPush.getModes().getValueByName("Блоки").get()) {
+            if (noPush.isState()
+                    && noPush.getModes().getValueByName("Блоки").get()) {
                 return false;
             }
 

@@ -1,6 +1,7 @@
 package net.minecraft.item;
 
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.player.ItemCooldown;
 import net.minecraft.entity.item.EnderPearlEntity;

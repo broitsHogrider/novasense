@@ -1,8 +1,12 @@
 package ru.novacore.functions.impl.movement;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 //.events.*;
-import ru.novacore.events.*;
+import ru.novacore.events.player.ActionEvent;
+import ru.novacore.events.player.EventDamageReceive;
+import ru.novacore.events.player.MovingEvent;
+import ru.novacore.events.player.PostMoveEvent;
+import ru.novacore.events.server.EventPacket;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -41,27 +45,27 @@ public class Strafe extends Function {
         addSettings(damageBoost, boostSpeed);
     }
 
-    @Subscribe
+    @EventHandler
     private void onAction(ActionEvent e) {
         handleEventAction(e);
     }
 
-    @Subscribe
+    @EventHandler
     private void onMoving(MovingEvent e) {
         handleEventMove(e);
     }
 
-    @Subscribe
+    @EventHandler
     private void onPostMove(PostMoveEvent e) {
         handleEventPostMove(e);
     }
 
-    @Subscribe
+    @EventHandler
     private void onPacket(EventPacket e) {
         handleEventPacket(e);
     }
 
-    @Subscribe
+    @EventHandler
     private void onDamage(EventDamageReceive e) {
         handleDamageEvent(e);
     }

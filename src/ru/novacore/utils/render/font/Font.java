@@ -58,24 +58,56 @@ public class Font implements IMinecraft {
         this.font.unbind();
         shader.detach();
     }
+
+    private static String replaceSymbols(String string) {
+        return string
+                .replaceAll("⚡", "")
+                .replaceAll("ᴀ", "a")
+                .replaceAll("ʙ", "b")
+                .replaceAll("ᴄ", "c")
+                .replaceAll("ᴅ", "d")
+                .replaceAll("ᴇ", "e")
+                .replaceAll("ғ", "f")
+                .replaceAll("ɢ", "g")
+                .replaceAll("ʜ", "h")
+                .replaceAll("ɪ", "i")
+                .replaceAll("ᴊ", "j")
+                .replaceAll("ᴋ", "k")
+                .replaceAll("ʟ", "l")
+                .replaceAll("ᴍ", "m")
+                .replaceAll("ɴ", "n")
+                .replaceAll("ᴏ", "o")
+                .replaceAll("ᴘ", "p")
+                .replaceAll("ǫ", "q")
+                .replaceAll("ʀ", "r")
+                .replaceAll("s", "s")
+                .replaceAll("ᴛ", "t")
+                .replaceAll("ᴜ", "u")
+                .replaceAll("ᴠ", "v")
+                .replaceAll("ᴡ", "w")
+                .replaceAll("x", "x")
+                .replaceAll("ʏ", "y")
+                .replaceAll("ᴢ", "z");
+    }
     // РАДИАЦИЯ ОПАСНО ОПАСНО!!!!
     public void drawText(MatrixStack stack, ITextComponent text, float x, float y, float size, int alpha) {
         float offset = 0;
         for (ITextComponent it : text.getSiblings()) {
 
             for (ITextComponent it1 : it.getSiblings()) {
-                String draw = it1.getString();
+                String draw = replaceSymbols(it1.getString());
 
                 if (it1.getStyle().getColor() != null) {
                     drawText(stack, draw, x + offset, y, ColorUtils.setAlpha(ColorUtils.toColor(it1.getStyle().getColor().getHex()), alpha), size);
-                } else
-                    drawText(stack, draw, x + offset, y, ColorUtils.setAlpha(Color.GRAY.getRGB(), alpha), size);
+                } else {
+                    drawText(stack, draw, x + offset, y, ColorUtils.setAlpha(-1, alpha), size);
+                }
                 offset += getWidth(draw, size);
             }
             if (it.getSiblings().size() <= 1) {
-                String draw = TextFormatting.getTextWithoutFormattingCodes(it.getString());
+                String draw = TextFormatting.getTextWithoutFormattingCodes(replaceSymbols(it.getString()));
 
-                drawText(stack, draw, x + offset, y, ColorUtils.setAlpha(it.getStyle().getColor() == null ? Color.GRAY.getRGB() : it.getStyle().getColor().getColor(), alpha), size);
+                drawText(stack, draw, x + offset, y, ColorUtils.setAlpha(it.getStyle().getColor() == null ? -1 : it.getStyle().getColor().getColor(), alpha), size);
                 offset += getWidth(draw, size);
             }
 
@@ -83,9 +115,9 @@ public class Font implements IMinecraft {
 
         }
         if (text.getSiblings().isEmpty()) {
-            String draw = TextFormatting.getTextWithoutFormattingCodes(text.getString());
+            String draw = TextFormatting.getTextWithoutFormattingCodes(replaceSymbols(text.getString()));
 
-            drawText(stack, draw, x + offset, y, ColorUtils.setAlpha(text.getStyle().getColor() == null ? Color.GRAY.getRGB() : text.getStyle().getColor().getColor(), alpha), size);
+            drawText(stack, draw, x + offset, y, ColorUtils.setAlpha(text.getStyle().getColor() == null ? -1 : text.getStyle().getColor().getColor(), alpha), size);
             offset += getWidth(draw, size);
         }
     }
@@ -95,11 +127,11 @@ public class Font implements IMinecraft {
         for (ITextComponent it : text.getSiblings()) {
 
             for (ITextComponent it1 : it.getSiblings()) {
-                String draw = it1.getString();
+                String draw = replaceSymbols(it1.getString());
                 offset += getWidth(draw, size);
             }
             if (it.getSiblings().size() <= 1) {
-                String draw = TextFormatting.getTextWithoutFormattingCodes(it.getString());
+                String draw = TextFormatting.getTextWithoutFormattingCodes(replaceSymbols(it.getString()));
                 offset += getWidth(draw, size);
             }
 
@@ -107,7 +139,7 @@ public class Font implements IMinecraft {
 
         }
         if (text.getSiblings().isEmpty()) {
-            String draw = TextFormatting.getTextWithoutFormattingCodes(text.getString());
+            String draw = TextFormatting.getTextWithoutFormattingCodes(replaceSymbols(text.getString()));
             offset += getWidth(draw, size);
         }
         return offset;

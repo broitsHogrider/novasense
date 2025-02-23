@@ -12,8 +12,8 @@ import com.mojang.blaze3d.vertex.MatrixApplyingVertexBuilder;
 import com.mojang.blaze3d.vertex.VertexBuilderUtils;
 
 import ru.novacore.NovaCore;
-import ru.novacore.events.Render3DPosedEvent;
-import ru.novacore.events.WorldEvent;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.render.WorldEvent;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -1949,16 +1949,13 @@ public class WorldRenderer implements IResourceManagerReloadListener, AutoClosea
                 Shaders.endParticles();
             }
         }
-        //dsad
-        Render3DPosedEvent event = new Render3DPosedEvent(matrixStackIn, matrix4f, activeRenderInfoIn, this, partialTicks, finishTimeNano, d0, d1, d2);
-        NovaCore.getInstance().getEventBus().post(event);
 
         GlStateManager.setFogAllowed(true);
         RenderSystem.pushMatrix();
         RenderSystem.multMatrix(matrixStackIn.getLast().getMatrix());
         render.setPartialTicks(partialTicks);
         render.setStack(matrixStackIn);
-        NovaCore.getInstance().getEventBus().post(render);
+        EventSystem.call(render);
        
         if (this.mc.gameSettings.getCloudOption() != CloudOption.OFF)
         {

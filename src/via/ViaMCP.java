@@ -5,6 +5,7 @@ package via;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
 

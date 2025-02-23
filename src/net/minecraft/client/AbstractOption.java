@@ -526,13 +526,6 @@ public abstract class AbstractOption
     {
         p_lambda$static$100_0_.invertMouse = p_lambda$static$100_1_;
     });
-    public static final BooleanOption REALMS_NOTIFICATIONS = new BooleanOption("options.realmsNotifications", (p_lambda$static$101_0_) ->
-    {
-        return p_lambda$static$101_0_.realmsNotifications;
-    }, (p_lambda$static$102_0_, p_lambda$static$102_1_) ->
-    {
-        p_lambda$static$102_0_.realmsNotifications = p_lambda$static$102_1_;
-    });
     public static final BooleanOption REDUCED_DEBUG_INFO = new BooleanOption("options.reducedDebugInfo", (p_lambda$static$103_0_) ->
     {
         return p_lambda$static$103_0_.reducedDebugInfo;

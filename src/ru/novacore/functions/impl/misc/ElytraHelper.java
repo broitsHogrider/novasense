@@ -1,6 +1,6 @@
 package ru.novacore.functions.impl.misc;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -10,15 +10,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.play.client.CEntityActionPacket;
-import ru.novacore.events.EventKey;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.input.EventKey;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
 import ru.novacore.functions.settings.impl.BindSetting;
 import ru.novacore.functions.settings.impl.BooleanSetting;
-import ru.novacore.functions.settings.impl.SliderSetting;
-import ru.novacore.ui.clickgui.settings.settings.BooleanElement;
 import ru.novacore.utils.math.StopWatch;
 import ru.novacore.utils.player.InventoryUtil;
 
@@ -28,18 +26,19 @@ public class ElytraHelper extends Function {
     final BindSetting swapChestKey = new BindSetting("Кнопка свапа", -1);
     final BindSetting fireWorkKey = new BindSetting("Кнопка фейерверка", -1);
     final BooleanSetting autoFly = new BooleanSetting("Авто-взлёт", true);
-    final BooleanSetting fireWorkBoolean = new BooleanSetting("Использовать фейерверк", true);
-    final SliderSetting fireWorkDelay = new SliderSetting("Заддержка", 1000, 1000, 10000, 100).setVisible(fireWorkBoolean::get);
+    final BooleanSetting autoFirework = new BooleanSetting("Авто-фейерверк", false).setVisible(autoFly::get);
+
 
     public ElytraHelper() {
-        addSettings(swapChestKey, fireWorkKey, autoFly, fireWorkBoolean, fireWorkDelay);
+        addSettings(swapChestKey, fireWorkKey, autoFly,autoFirework);
     }
 
     ItemStack currentStack = ItemStack.EMPTY;
     public static StopWatch stopWatch = new StopWatch();
+    public static StopWatch fireworkTimer = new StopWatch();
     boolean fireworkUsed;
 
-    @Subscribe
+    @EventHandler
     public void onEventKey(EventKey eventKey) {
         if (eventKey.getKey() == swapChestKey.get()) {
             changeChestPlate(currentStack);
@@ -50,17 +49,22 @@ public class ElytraHelper extends Function {
         }
     }
 
-    @Subscribe
+    boolean startFallFlying;
+
+    @EventHandler
     public void onUpdt(EventUpdate eventUpdate) {
         this.currentStack = mc.player.getItemStackFromSlot(EquipmentSlotType.CHEST);
 
-        if (autoFly.get() && currentStack.getItem() == Items.ELYTRA) {
-            if (mc.player.isOnGround() && !mc.player.isInLava() && !mc.player.isInWater() && !mc.gameSettings.keyBindJump.isKeyDown()) {
+        if (this.autoFly.get() && this.currentStack.getItem() == Items.ELYTRA) {
+            if (mc.player.isOnGround()) {
                 mc.player.jump();
-            } else if (ElytraItem.isUsable(currentStack) && !mc.player.isElytraFlying() && !mc.player.isOnGround()) {
+            } else if (ElytraItem.isUsable(this.currentStack) && !mc.player.isElytraFlying()) {
                 mc.player.startFallFlying();
                 mc.player.connection.sendPacket(new CEntityActionPacket(mc.player, CEntityActionPacket.Action.START_FALL_FLYING));
-                InventoryUtil.inventorySwapClick(Items.FIREWORK_ROCKET, -1);
+                if (fireworkTimer.hasElapsed(100)) {
+                    InventoryUtil.inventorySwapClick(Items.FIREWORK_ROCKET, -1);
+                    fireworkTimer.reset();
+                }
             }
         }
 
@@ -78,11 +82,6 @@ public class ElytraHelper extends Function {
             }
             fireworkUsed = false;
         }
-        if (fireWorkBoolean.get() && mc.player.isElytraFlying()) {
-            if (stopWatch.hasTimeElapsed(fireWorkDelay.get().longValue())) {
-                InventoryUtil.inventorySwapClick(Items.FIREWORK_ROCKET, -1);
-            }
-        }
     }
 
     private void changeChestPlate(ItemStack stack) {
@@ -90,19 +89,14 @@ public class ElytraHelper extends Function {
             int elytraSlot = getItemSlot(Items.ELYTRA);
             if (elytraSlot >= 0) {
                 currentStack = mc.player.inventory.getStackInSlot(elytraSlot).copy();
-                mc.playerController.windowClick(0, elytraSlot, 8, ClickType.SWAP, mc.player);
-                mc.playerController.windowClick(0, 6, 8, ClickType.SWAP, mc.player);
-                mc.playerController.windowClick(0, elytraSlot, 8, ClickType.SWAP, mc.player);
+                InventoryUtil.moveItem(elytraSlot, 6);
                 return;
-            } else {
             }
         }
         int armorSlot = getChestPlateSlot();
         if (armorSlot >= 0) {
             currentStack = mc.player.inventory.getStackInSlot(armorSlot).copy();
-            mc.playerController.windowClick(0, armorSlot, 8, ClickType.SWAP, mc.player);
-            mc.playerController.windowClick(0, 6, 8, ClickType.SWAP, mc.player);
-            mc.playerController.windowClick(0, armorSlot, 8, ClickType.SWAP, mc.player);
+            InventoryUtil.moveItem(armorSlot, 6);
         }
     }
 

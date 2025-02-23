@@ -1,7 +1,7 @@
 package ru.novacore.functions.impl.render;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.WorldEvent;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.render.WorldEvent;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -14,14 +14,13 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
-import ru.novacore.utils.render.RenderUtils;
 
 import static org.lwjgl.opengl.GL11.*;
 
 @FunctionInfo(name = "Predictions", category = Category.Render)
 public class Predictions extends Function {
 
-    @Subscribe
+    @EventHandler
     public void onRender(WorldEvent event) {
         glPushMatrix();
 

@@ -5,7 +5,8 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventCancelOverlay;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.render.EventCancelOverlay;
 
 import java.util.Map;
 import java.util.UUID;
@@ -31,7 +32,7 @@ public class BossOverlayGui extends AbstractGui {
 
     public void func_238484_a_(MatrixStack p_238484_1_) {
                 EventCancelOverlay eventCancelOverlay = new EventCancelOverlay(EventCancelOverlay.Overlays.BOSS_LINE);
-        NovaCore.getInstance().getEventBus().post(eventCancelOverlay);
+        EventSystem.call(eventCancelOverlay);
         if (eventCancelOverlay.isCancel()) {
             eventCancelOverlay.open();
             return;

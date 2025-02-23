@@ -1,7 +1,7 @@
 package ru.novacore.functions.impl.render;
 
-import com.google.common.eventbus.Subscribe;
-import ru.novacore.events.EventDisplay;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.render.EventDisplay;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -37,7 +37,7 @@ public class Crosshair extends Function {
         addSettings(mode, staticCrosshair);
     }
 
-    @Subscribe
+    @EventHandler
     public void onDisplay(EventDisplay e) {
         if (mc.player == null || mc.world == null || e.getType() != EventDisplay.Type.POST) {
             return;

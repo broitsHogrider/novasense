@@ -8,6 +8,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import ru.hogoshi.Animation;
 import ru.hogoshi.util.Easings;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.functions.api.FunctionRegistry;
 import ru.novacore.functions.impl.misc.BetterMinecraft;
 import ru.novacore.utils.animations.Direction;

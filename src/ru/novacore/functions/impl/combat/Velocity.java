@@ -1,9 +1,9 @@
 package ru.novacore.functions.impl.combat;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 
-import ru.novacore.events.EventPacket;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.server.EventPacket;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.settings.impl.ModeSetting;
@@ -29,7 +29,7 @@ public class   Velocity extends Function {
     }
 
 
-    @Subscribe
+    @EventHandler
     public void onPacket(EventPacket e) {
         if (mc.player == null) return;
         if (e.isReceive()) {
@@ -99,7 +99,7 @@ public class   Velocity extends Function {
 
     BlockPos blockPos;
 
-    @Subscribe
+    @EventHandler
     public void onUpdate(EventUpdate e) {
         if (mode.is("Funtime")) {
             skip--;

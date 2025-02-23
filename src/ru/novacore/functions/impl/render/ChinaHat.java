@@ -1,10 +1,10 @@
 package ru.novacore.functions.impl.render;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import ru.novacore.command.friends.FriendStorage;
-import ru.novacore.events.WorldEvent;
+import ru.novacore.events.render.WorldEvent;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -30,7 +30,7 @@ public class ChinaHat extends Function {
         addSettings(friendHat);
     }
 
-    @Subscribe
+    @EventHandler
     private void onRender(WorldEvent e) {
         if (mc.gameSettings.getPointOfView() != PointOfView.FIRST_PERSON) {
             renderHatForPlayer(mc.player, e);

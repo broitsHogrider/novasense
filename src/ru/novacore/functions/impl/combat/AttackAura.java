@@ -1,21 +1,36 @@
 package ru.novacore.functions.impl.combat;
 
-import com.google.common.eventbus.Subscribe;
-import net.minecraft.client.settings.KeyBinding;
+import ru.novacore.events.EventHandler;
+import lombok.Getter;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
+import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.monster.PhantomEntity;
-import net.minecraft.entity.monster.PillagerEntity;
-import net.minecraft.item.UseAction;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.ClickType;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CEntityActionPacket;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.network.play.client.CHeldItemChangePacket;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Hand;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector2f;
+import net.minecraft.util.math.vector.Vector3d;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.command.friends.FriendStorage;
-import ru.novacore.events.EventInput;
-import ru.novacore.events.EventMotion;
-import ru.novacore.events.EventPacket;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.input.EventInput;
+import ru.novacore.events.input.EventMotion;
+import ru.novacore.events.server.EventPacket;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -25,88 +40,59 @@ import ru.novacore.functions.settings.impl.ModeListSetting;
 import ru.novacore.functions.settings.impl.ModeSetting;
 import ru.novacore.functions.settings.impl.SliderSetting;
 import ru.novacore.utils.client.ClientUtil;
-import ru.novacore.utils.math.MathUtil;
 import ru.novacore.utils.math.SensUtils;
 import ru.novacore.utils.math.StopWatch;
-import ru.novacore.utils.player.DamagePlayerUtil;
 import ru.novacore.utils.player.InventoryUtil;
 import ru.novacore.utils.player.MouseUtil;
 import ru.novacore.utils.player.MoveUtils;
-import lombok.Getter;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.monster.MonsterEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.ClickType;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.CHeldItemChangePacket;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector3d;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 import static java.lang.Math.hypot;
-import static java.lang.Math.nextUp;
 import static net.minecraft.util.math.MathHelper.clamp;
 import static net.minecraft.util.math.MathHelper.wrapDegrees;
-// by lapycha and artem
+
 @FunctionInfo(name = "AttackAura", category = Category.Combat)
 public class AttackAura extends Function {
     @Getter
-    private final ModeSetting bypass = new ModeSetting("Обход Античита","ReallyWorld","ReallyWorld","LegendsGrief");
-    private final ModeSetting type = new ModeSetting("Тип", "Плавная", "Плавная", "Резкая");
-    private final SliderSetting attackRange = new SliderSetting("Дистанция аттаки", 3f, 3f, 6f, 0.1f);
-    private final SliderSetting rotateRange = new SliderSetting("Дистанция наведение", 1.0f, 0.0f, 3.0f, 0.1f).setVisible(() -> type.is("Плавная"));
-    private final SliderSetting elytraRotateRange = new SliderSetting("Элитра наведение", 30.0f, 0.0f, 70.0f, 1.0f);
-
+    private final ModeSetting type = new ModeSetting("Тип", "Плавный", "Плавный", "Резкий");
+    private final SliderSetting attackRange = new SliderSetting("Дистанция аттаки", 3f, 2.5f, 6f, 0.1f);
+    private final SliderSetting searchRange = new SliderSetting("Дистанция наведение", 1.0f, 0.0f, 3.0f, 0.1f).setVisible(() -> type.is("Плавный"));
+    private final SliderSetting elytraSearchRange = new SliderSetting("Элитра наведение", 30.0f, 0f, 60f, 1f);
     final ModeListSetting targets = new ModeListSetting("Таргеты",
             new BooleanSetting("Игроки", true),
-            new BooleanSetting("Мобы", false),
-            new BooleanSetting("Друзья", true),
             new BooleanSetting("Голые", true),
+            new BooleanSetting("Мобы", false),
+            new BooleanSetting("Животные", false),
+            new BooleanSetting("Друзья", false),
+            new BooleanSetting("Голые невидимки", true),
             new BooleanSetting("Невидимки", true));
 
     @Getter
-    final ModeListSetting options = new ModeListSetting("Настройки",
+    final ModeListSetting options = new ModeListSetting("Опции",
             new BooleanSetting("Только криты", true),
             new BooleanSetting("Ломать щит", true),
             new BooleanSetting("Отжимать щит", true),
-            new BooleanSetting("Учитовать ТПС", false),
-            new BooleanSetting("Статичная цель", true),
-            new BooleanSetting("Коррекция движения", true),
-            new BooleanSetting("Бить через стены", true),
-            new BooleanSetting("Не бить когда ешь", true),
-            new BooleanSetting("Не бить с щитом", true));
+            new BooleanSetting("Синхронизировать атаку с ТПС", false),
+            new BooleanSetting("Фокусировать одну цель", true),
+            new BooleanSetting("Коррекция движения", true));
+    final ModeSetting correctionType = new ModeSetting("Тип коррекции", "Незаметный", "Незаметный", "Сфокусированный").setVisible(options.getValueByName("Коррекция движения")::get);
 
-    final ModeSetting correctionType = new ModeSetting("Тип коррекции", "Незаметный", "Незаметный", "Сфокусированный");
+    final BooleanSetting smartCorrection = new BooleanSetting("Умная коррекция", true).setVisible(options.getValueByName("Коррекция движения")::get);
 
-    final BooleanSetting forwardboolean = new BooleanSetting("Обгонять", true);
-    final SliderSetting forward = new SliderSetting("Значение обгона", 0.0f, 0.0f, 3.0f, 0.1f).setVisible(() -> forwardboolean.get());
-    final BooleanSetting smartCrits = new BooleanSetting("Умные криты", false).setVisible(() -> options.get(0).get());
-    final BooleanSetting rayTraceCheck = new BooleanSetting("Проверка на наведение", true).setVisible(() -> type.is("Плавная"));
-    final BooleanSetting chekarmor = new BooleanSetting("Приоритет на элитры", true);
-    //final ModeSetting sprintSetting = new ModeSetting("Сброс спринта", "Легитный", "Легитный", "Пакетный");
+    final BooleanSetting obgon = new BooleanSetting("Обгон", false);
 
-    @Getter
-    private final StopWatch stopWatch = new StopWatch();
+    final SliderSetting obgonVal = new SliderSetting("Значение обгона", 75f, 0f, 100f, 1f).setVisible(obgon::get);
+
     @Getter
     private Vector2f rotateVector = new Vector2f(0, 0);
+
+    private final StopWatch stopWatch = new StopWatch();
     @Getter
     private LivingEntity target;
     private Entity selected;
-
-    long cpsLimit = 0;
 
     int ticks = 0;
     boolean isRotated;
@@ -115,50 +101,50 @@ public class AttackAura extends Function {
 
     public AttackAura(AutoPotion autoPotion) {
         this.autoPotion = autoPotion;
-        addSettings(type, attackRange,rotateRange,elytraRotateRange, targets, options, correctionType, smartCrits, forward,chekarmor, rayTraceCheck, forwardboolean);
+        addSettings(type, attackRange, searchRange,elytraSearchRange, targets, options, correctionType, smartCorrection, obgon, obgonVal);
     }
 
-    @Subscribe
+    @EventHandler
     public void onInput(EventInput eventInput) {
         if (options.getValueByName("Коррекция движения").get() && correctionType.is("Незаметный") && target != null && mc.player != null) {
-            MoveUtils.fixMovement(eventInput, rotateVector.x);
+            MoveUtils.fixMovement(eventInput, autoPotion.isActive() ? Minecraft.getInstance().player.rotationYaw : rotateVector.x);
         }
     }
 
-    @Subscribe
+    @EventHandler
     public void onUpdate(EventUpdate e) {
-        if (options.getValueByName("Статичная цель").get() && (target == null || !isValid(target)) || !options.getValueByName("Статичная цель").get()) {
+        if (options.getValueByName("Фокусировать одну цель").get() && (target == null || !isValid(target)) || !options.getValueByName("Фокусировать одну цель").get()) {
             updateTarget();
         }
 
-        if (target == null || autoPotion.isActive()) {
-            cpsLimit = System.currentTimeMillis();
-            reset();
-            return;
-        }
-        isRotated = false;
+        boolean elytraTarget = smartCorrection.get() && mc.player.isElytraFlying();
 
-        boolean elytraTarget = mc.player.isElytraFlying();
-        if (type.is("Резкая") && !elytraTarget) {
-            if (shouldAttack()) {
+        if (target != null && !(autoPotion.isState() && autoPotion.isActive())) {
+            isRotated = false;
+            if (shouldPlayerFalling() && (stopWatch.hasTimeElapsed())) {
                 updateAttack();
                 ticks = 2;
             }
-            if (ticks > 0) {
-                updateRotation(true,180.0f, 90.0f);
-                --ticks;
-            } else {
-                reset();
+            if (type.is("Резкий") || !elytraTarget) {
+                if (ticks > 0) {
+                    updateRotation(180, 90);
+                    ticks--;
+                } else {
+                    reset();
+                }
             }
-        }
-        if (type.is("Плавная") || elytraTarget) {
-            if (shouldAttack()) {
-                updateAttack();
+            if (type.is("Плавный") || elytraTarget) {
+                if (!isRotated) {
+                    updateRotation(180, 90);
+                }
             }
-            updateRotation(false, 180.0f, 90.0f);
+        } else {
+            stopWatch.setLastMS(0);
+            reset();
         }
     }
-    @Subscribe
+
+    @EventHandler
     private void onWalking(EventMotion e) {
         if (target == null || autoPotion.isState() && autoPotion.isActive()) return;
 
@@ -168,7 +154,7 @@ public class AttackAura extends Function {
         e.setYaw(yaw);
         e.setPitch(pitch);
         mc.player.rotationYawHead = yaw;
-        mc.player.renderYawOffset = MathUtil.calculateCorrectYawOffset(yaw);
+        mc.player.renderYawOffset = yaw;
         mc.player.rotationPitchHead = pitch;
     }
 
@@ -212,87 +198,52 @@ public class AttackAura extends Function {
         target = targets.get(0);
     }
 
-    private boolean shouldAttack() {
-        return target != null && shouldPlayerFalling() && cpsLimit <= System.currentTimeMillis();
-    }
-
     float lastYaw, lastPitch;
 
-    //chat gpt!!!!!
     private boolean disableForward;
     private final StopWatch forwardTimer = new StopWatch();
 
-    private void updateRotation(boolean attack, float rotationYawSpeed, float rotationPitchSpeed) {
-        Vector3d vec3d = MathUtil.getVector(target);
+    private void updateRotation(float rotationYawSpeed, float rotationPitchSpeed) {
+        Vector3d vec = target.getPositionVec().add(0, clamp(mc.player.getPosYEye() - target.getPosY(),
+                        0, target.getHeight() * (mc.player.getDistanceEyePos(target) / attackRange.get())), 0)
+                .subtract(mc.player.getEyePosition(1.0F));
 
-        double yDiff = target.getPosY() - mc.player.getPosY();
-        boolean notSwimmingFlying = !target.isSwimming() && !target.isElytraFlying();
-
-        if (yDiff > 0.0 && yDiff < 1.1 && notSwimmingFlying) {
-            vec3d = vec3d.subtract(0, yDiff, 0);
-        } else if (yDiff >= 1.1 && notSwimmingFlying) {
-            vec3d = vec3d.subtract(0, 1.1, 0);
-        } else if (yDiff < 0.0 && -yDiff <= 0.25 && notSwimmingFlying) {
-            vec3d = vec3d.add(0, target.isSneaking() ? 0 : -yDiff, 0);
-        } else if (yDiff < -0.25 && notSwimmingFlying) {
-            vec3d = vec3d.add(0, target.isSneaking() ? 0 : 0.25, 0);
+        if (mc.player.isElytraFlying() && obgon.get() && !disableForward) {
+            vec = target.getPositionVec()
+                    .add(0.0F, MathHelper.clamp(target.getPosY() - target.getHeight(), 0.0F, target.getHeight() / 2.0F), 0.0F)
+                    .subtract(mc.player.getEyePosition(1.0F))
+                    .add(target.getMotion().mul(
+                            target.isElytraFlying() ? obgonVal.get() / 20.0f : 0f,
+                            target.isElytraFlying() ? obgonVal.get() / 20.0f : 0f,
+                            target.isElytraFlying() ? obgonVal.get() / 20.0f : 0f
+                    ));
         }
-
         isRotated = true;
 
-        boolean bothFlying = mc.player.isElytraFlying() && target.isElytraFlying();
-
-        if (forwardboolean.get() && !disableForward && bothFlying) {
-            double boostMultiplier = forward.get().doubleValue();
-
-            Vector3d targetMotion = target.getMotion();
-            double predictionFactor = mc.player.isElytraFlying() && target.isElytraFlying() ? boostMultiplier : boostMultiplier * 0.5;
-
-            Vector3d predictedMotion = targetMotion.scale(predictionFactor);
-            vec3d = vec3d.add(predictedMotion);
-
-            double distance = mc.player.getDistance(target);
-            double angleCorrection = Math.min(distance / 20.0, 1.0);
-            vec3d = vec3d.add(targetMotion.normalize().scale(angleCorrection * 0.1));
-        }
-
-        float yawToTarget = (float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(vec3d.z, vec3d.x)) - 90);
-        float pitchToTarget = (float) (-Math.toDegrees(Math.atan2(vec3d.y, hypot(vec3d.x, vec3d.z))));
+        float yawToTarget = (float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(vec.z, vec.x)) - 90);
+        float pitchToTarget = (float) (Math.toDegrees(-Math.atan2(vec.y, hypot(vec.x, vec.z))));
 
         float yawDelta = (wrapDegrees(yawToTarget - rotateVector.x));
-        float pitchDelta = (wrapDegrees(pitchToTarget - rotateVector.y));
-
-        float rotationDifference = (float)Math.hypot(Math.abs(pitchDelta), Math.abs(yawDelta));
-
+        float pitchDelta = pitchToTarget - rotateVector.y;
         int roundedYaw = (int) yawDelta;
 
         switch (type.get()) {
-            case "Плавная" -> {
-                float limitedYaw = Math.abs(yawDelta / rotationDifference) * rotationYawSpeed;
-                float limitedPitch = Math.abs(pitchDelta / rotationDifference) * rotationPitchSpeed;
+            case "Плавный" -> {
+                float clampedYaw = Math.min(Math.max(Math.abs(yawDelta), 1.0f), rotationYawSpeed);
+                float clampedPitch = Math.min(Math.max(Math.abs(pitchDelta), 1.0f), rotationPitchSpeed);
 
-                if (attack && selected != target) {
-                    limitedPitch = Math.max(Math.abs(pitchDelta), 1.0f);
-                } else {
-                    limitedYaw /= 3f;
-                }
-
-                float finalYaw = rotateVector.x + Math.min(Math.max(yawDelta, -limitedYaw), limitedYaw);
-                float finalPitch = MathHelper.clamp(rotateVector.y + Math.min(Math.max(pitchDelta, -limitedPitch), limitedPitch) + (mc.player.isElytraFlying() ? SensUtils.getSensitivity((float) (Math.cos(System.currentTimeMillis() / 50L) * 7.0F)) : 0.0f), -89, 89.0F);
+                float yaw = rotateVector.x + (yawDelta > 0 ? clampedYaw : -clampedYaw);
+                float pitch = clamp(rotateVector.y + (pitchDelta > 0 ? clampedPitch : -clampedPitch), -89.0F, 89.0F);
 
                 float gcd = SensUtils.getGCDValue();
+                yaw -= (yaw - rotateVector.x) % gcd;
+                pitch -= (pitch - rotateVector.y) % gcd;
 
-                finalYaw -= (finalYaw - rotateVector.x) % gcd;
-                finalPitch -= (finalPitch - rotateVector.y) % gcd;
-
-                lastYaw = finalYaw;
-                lastPitch = finalPitch;
-                rotateVector = new Vector2f(finalYaw, finalPitch);
-                if (options.getValueByName("Коррекция движения").get()) {
-                    mc.player.rotationYawOffset = finalYaw;
-                }
+                rotateVector = new Vector2f(yaw, pitch);
+                lastYaw = clampedYaw;
+                lastPitch = clampedPitch;
             }
-            case "Резкая" -> {
+            case "Резкий" -> {
                 float yaw = rotateVector.x + roundedYaw;
                 float pitch = clamp(rotateVector.y + pitchDelta, -90, 90);
 
@@ -301,17 +252,11 @@ public class AttackAura extends Function {
                 pitch -= (pitch - rotateVector.y) % gcd;
 
                 rotateVector = new Vector2f(yaw, pitch);
-
-                if (options.getValueByName("Коррекция движения").get()) {
-                    mc.player.rotationYawOffset = yaw;
-                }
             }
         }
     }
 
-
-    //РАДИАЦИЯ АПАСНА!!!!!
-    @Subscribe
+    @EventHandler
     public void onPacketEvent(EventPacket eventPacket) {
         if (mc.player.hurtTime > 0) {
             disableForward = true;
@@ -324,97 +269,65 @@ public class AttackAura extends Function {
 
     private void updateAttack() {
         selected = MouseUtil.getMouseOver(target, rotateVector.x, rotateVector.y, attackRange.get());
-        if ((selected == null || selected != target) && !mc.player.isElytraFlying() && rayTraceCheck.get()) {
-            return;
-        }
 
-        if (options.getValueByName("Не бить когда ешь").get() && mc.player.isHandActive() && mc.player.getHeldItemOffhand().getUseAction() == UseAction.EAT) {
-            return;
-        }
-        if (options.getValueByName("Не бить с щитом").get() && mc.player.isBlocking()) {
+        if ((selected == null || selected != target) && !type.is("Резкий") && !mc.player.isElytraFlying()) {
             return;
         }
 
         if (mc.player.isBlocking() && options.getValueByName("Отжимать щит").get()) {
             mc.playerController.onStoppedUsingItem(mc.player);
         }
-
-        boolean sprinting = !ClientUtil.isConnectedToServer("legendsgrief") && mc.player.serverSprintState;
-
-        if (sprinting) {
+        boolean sprint = false;
+        if (CEntityActionPacket.lastUpdatedSprint && !mc.player.isInWater() && !ClientUtil.isConnectedToServer("legendsgrief")) {
             mc.player.connection.sendPacket(new CEntityActionPacket(mc.player, CEntityActionPacket.Action.STOP_SPRINTING));
+            sprint = true;
         }
 
         AutoSprint autoSprint = NovaCore.getInstance().getFunctionRegistry().getAutoSprint();
-
         if (!ClientUtil.isConnectedToServer("legendsgrief") && autoSprint.isState()) {
             autoSprint.setEmergencyStop(true);
         }
-//        if (mc.player.isSprinting()) mc.player.setSprinting(false);
-//
-//        if (bypass.get().equals("ReallyWorld")) {
-//            cpsLimit = System.currentTimeMillis() + 500;
-//            if(mc.player.isSprinting())
-//                mc.player.setSprinting(false);
-//
-//        } else if (bypass.get().equals("LegendsGrief")) {
-//            cpsLimit = System.currentTimeMillis() + 500+ (int) (Math.random() * 71);
-//            if ((double) mc.timer.timerSpeed == 1.0) {
-//                mc.timer.timerSpeed = 1.005F;
-//                if(mc.player.isSprinting()) mc.player.setSprinting(false);
-//            }
-//        }
 
-        cpsLimit = System.currentTimeMillis() + 500;
+        stopWatch.setLastMS(500);
         mc.playerController.attackEntity(mc.player, target);
         mc.player.swingArm(Hand.MAIN_HAND);
-
-        if (mc.player.isSprinting()) {
-            mc.player.setSprinting(false);
-        }
 
         if (target instanceof PlayerEntity player && options.getValueByName("Ломать щит").get()) {
             breakShieldPlayer(player);
         }
-
-        if (sprinting) {
-            mc.player.setSprinting(false);
+        if (sprint) {
             mc.player.connection.sendPacket(new CEntityActionPacket(mc.player, CEntityActionPacket.Action.START_SPRINTING));
         }
     }
 
-
     private boolean shouldPlayerFalling() {
-        boolean onSpace = smartCrits.get() && mc.player.isOnGround() && !mc.gameSettings.keyBindJump.isKeyDown();
-
-        boolean reasonForAttack = mc.player.isPotionActive(Effects.LEVITATION)
-                || mc.player.isPotionActive(Effects.BLINDNESS)
-                || mc.player.isPotionActive(Effects.SLOW_FALLING)
+        boolean cancelReason = mc.player.isInWater() && mc.player.areEyesInFluid(FluidTags.WATER)
+                || mc.player.isInLava()
                 || mc.player.isOnLadder()
-                || mc.player.isInWater() && mc.player.areEyesInFluid(FluidTags.WATER)
-                || mc.player.isInLava() && mc.player.areEyesInFluid(FluidTags.LAVA)
                 || mc.player.isPassenger()
-                || mc.player.abilities.isFlying
-                || mc.player.isElytraFlying()
-                || mc.player.isSwimming();
+                || mc.player.abilities.isFlying;
 
-        if (mc.player.getDistance(target) > attackRange.get() || mc.player.getCooledAttackStrength(options.getValueByName("Учитовать ТПС").get() ? NovaCore.getInstance().getTpsCalc().getAdjustTicks() : 1.5f) < 0.93f) return false;
+        float attackStrength = mc.player.getCooledAttackStrength(options.getValueByName("Синхронизировать атаку с ТПС").get()
+                ? NovaCore.getInstance().getTpsCalc().getAdjustTicks() : 1.5f);
 
-        if (!reasonForAttack && options.get(0).get()) return onSpace || !mc.player.isOnGround() && mc.player.fallDistance > 0;
+        if (attackStrength < 0.92f) {
+            return false;
+        }
+
+        if (mc.player.getDistanceEyePos(target) > attackRange.get()) return false;
+
+        if (!cancelReason && options.getValueByName("Только криты").get()) {
+            return !mc.player.isOnGround() && mc.player.fallDistance > 0;
+        }
 
         return true;
     }
 
     private boolean isValid(LivingEntity entity) {
         if (entity instanceof ClientPlayerEntity) return false;
-        if (entity instanceof ArmorStandEntity) return false;
-        if (!options.getValueByName("Бить через стены").get() && !mc.player.canEntityBeSeen(entity)) return false;
 
         if (entity.ticksExisted < 3) return false;
-
-        if (mc.player.getDistanceEyePos(entity) >
-                attackRange.get() + (!type.is("Резкая") ? rotateRange.get() : 0)
-                        + (mc.player.isElytraFlying() ? elytraRotateRange.get() : 0.0f)) return false;
+        if (mc.player.getDistanceEyePos(entity) > attackRange.get() + (type.is("Плавный") ? searchRange.get() : 0.0f) + (mc.player.isElytraFlying() ? elytraSearchRange.get() : 0.0f)) return false;
 
         if (entity instanceof PlayerEntity p) {
             if (AntiBot.isBot(entity)) {
@@ -424,25 +337,29 @@ public class AttackAura extends Function {
                 return false;
             }
             if (p.getName().getString().equalsIgnoreCase(mc.player.getName().getString())) return false;
-            if (mc.player.isElytraFlying() && chekarmor.get() && !p.isElytraFlying()) return false;
         }
 
         if (entity instanceof PlayerEntity && !targets.getValueByName("Игроки").get()) {
             return false;
         }
-
         if (entity instanceof PlayerEntity && entity.getTotalArmorValue() == 0 && !targets.getValueByName("Голые").get()) {
+            return false;
+        }
+        if (entity instanceof PlayerEntity && entity.isInvisible() && entity.getTotalArmorValue() == 0 && !targets.getValueByName("Голые невидимки").get()) {
             return false;
         }
         if (entity instanceof PlayerEntity && entity.isInvisible() && !targets.getValueByName("Невидимки").get()) {
             return false;
         }
 
-        if (entity instanceof MonsterEntity || entity instanceof PhantomEntity || entity instanceof VillagerEntity || entity instanceof AnimalEntity && !targets.getValueByName("Мобы").get()) {
+        if (entity instanceof MonsterEntity && !targets.getValueByName("Мобы").get()) {
+            return false;
+        }
+        if (entity instanceof AnimalEntity && !targets.getValueByName("Животные").get()) {
             return false;
         }
 
-        return !entity.isInvulnerable() && entity.isAlive() && !(entity instanceof ArmorStandEntity);
+        return !entity.isInvulnerable() && entity.isAlive() && !(entity instanceof ArmorStandEntity) && !(entity instanceof PhantomEntity) && !(entity instanceof VillagerEntity);
     }
 
     private void breakShieldPlayer(PlayerEntity entity) {
@@ -473,6 +390,7 @@ public class AttackAura extends Function {
         }
     }
 
+
     private void reset() {
         if (options.getValueByName("Коррекция движения").get()) {
             mc.player.rotationYawOffset = Integer.MIN_VALUE;
@@ -491,7 +409,7 @@ public class AttackAura extends Function {
     public void onDisable() {
         super.onDisable();
         reset();
-        cpsLimit = System.currentTimeMillis();
+        stopWatch.setLastMS(0);
         target = null;
     }
 
@@ -504,7 +422,7 @@ public class AttackAura extends Function {
         }
         return d2;
     }
-    //dsad
+
     private double getProtectionLvl(ItemStack stack) {
         if (stack.getItem() instanceof ArmorItem i) {
             double damageReduceAmount = i.getDamageReduceAmount();

@@ -4,7 +4,8 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import ru.novacore.NovaCore;
-import ru.novacore.events.EventCancelOverlay;
+import ru.novacore.events.EventSystem;
+import ru.novacore.events.render.EventCancelOverlay;
 
 import javax.annotation.Nullable;
 import net.minecraft.block.BlockRenderType;
@@ -166,7 +167,7 @@ public class OverlayRenderer {
 
     private static void renderFire(Minecraft minecraftIn, MatrixStack matrixStackIn) {
         EventCancelOverlay eventCancelOverlay = new EventCancelOverlay(EventCancelOverlay.Overlays.FIRE_OVERLAY);
-        NovaCore.getInstance().getEventBus().post(eventCancelOverlay);
+        EventSystem.call(eventCancelOverlay);
 
         if (eventCancelOverlay.isCancel()) {
             eventCancelOverlay.open();

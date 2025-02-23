@@ -1,8 +1,7 @@
 package ru.novacore.functions.impl.render;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
@@ -13,6 +12,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.EffectUtils;
 import net.minecraft.scoreboard.ScorePlayerTeam;
@@ -22,16 +22,15 @@ import net.minecraft.util.math.vector.Vector4f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameType;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.command.staffs.StaffStorage;
-import ru.novacore.events.EventDisplay;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.player.EventUpdate;
+import ru.novacore.events.render.EventDisplay;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
 import ru.novacore.functions.settings.impl.BooleanSetting;
 import ru.novacore.functions.settings.impl.ModeListSetting;
-import ru.novacore.functions.settings.impl.ModeSetting;
-import ru.novacore.ui.styles.StyleManager;
 import ru.novacore.utils.animations.Animation;
 import ru.novacore.utils.animations.Direction;
 import ru.novacore.utils.animations.impl.DecelerateAnimation;
@@ -42,6 +41,7 @@ import ru.novacore.utils.drag.Dragging;
 import ru.novacore.utils.font.FontManager;
 import ru.novacore.utils.math.MathUtil;
 import ru.novacore.utils.math.StopWatch;
+import ru.novacore.utils.math.Vector4i;
 import ru.novacore.utils.render.ColorUtils;
 import ru.novacore.utils.render.RenderUtils;
 import ru.novacore.utils.text.GradientUtil;
@@ -66,15 +66,15 @@ public class HudNew extends Function {
         addSettings(modeListSetting);
     }
 
-    private Dragging keybinds = NovaCore.getInstance().createDrag(this, "keybinds", 100, 100);
-    private Dragging staffOnlineDraggable = NovaCore.getInstance().createDrag(this, "staff list", 200, 100);
-    private Dragging activePotionsDraggable = NovaCore.getInstance().createDrag(this, "potions", 300, 100);
+    private final Dragging keybinds = NovaCore.getInstance().createDrag(this, "keybinds", 255, 150);
+    private final Dragging staffOnlineDraggable = NovaCore.getInstance().createDrag(this, "staff list", 200, 100);
+    private final Dragging activePotionsDraggable = NovaCore.getInstance().createDrag(this, "potions", 300, 100);
 
     private final List<Staff> staffPlayers = new ArrayList<>();
     private final Pattern namePattern = Pattern.compile("^\\w{3,16}$");
     private final Pattern prefixMatches = Pattern.compile(".*(mod|der|adm|help|wne|хелп|адм|поддержка|кура|own|taf|curat|dev|supp|yt|сотруд).*");
 
-    @Subscribe
+    @EventHandler
     public void onUpdate(EventUpdate eventUpdate) {
         staffPlayers.clear();
 
@@ -135,7 +135,7 @@ public class HudNew extends Function {
         }
     }
 
-    @Subscribe
+    @EventHandler
     public void onDisplay(EventDisplay eventDisplay) {
         if (mc.gameSettings.showDebugInfo || eventDisplay.getType() != EventDisplay.Type.POST) return;
         MatrixStack matrixStack = eventDisplay.getMatrixStack();
@@ -164,7 +164,7 @@ public class HudNew extends Function {
         float pingWidth = FontManager.sfBold[16].getWidth(pingText);
         width += titleWidth + separatorWidth * 1.5f + fpsWidth + pingWidth;
 
-        RenderUtils.Render2D.drawShadow(x, y, width, height, 8, ColorUtils.getColor(0), ColorUtils.getColor(90), ColorUtils.getColor(180), ColorUtils.getColor(270));
+        RenderUtils.Render2D.drawShadow(x, y, width, height, 10, ColorUtils.getColor(0), ColorUtils.getColor(90), ColorUtils.getColor(180), ColorUtils.getColor(270));
         RenderUtils.Render2D.drawRound(x, y, width, height, 3, ColorUtils.rgb(18, 18, 18));
 
         float textX = x + 2.5f;
@@ -195,7 +195,7 @@ public class HudNew extends Function {
         animateW = MathUtil.lerp(animateW, width, 15);
         animateH = MathUtil.lerp(animateH, height, 15);
 
-        RenderUtils.Render2D.drawShadow(posX, posY, animateW, animateH + 20, 8, ColorUtils.getColor(0), ColorUtils.getColor(90), ColorUtils.getColor(180), ColorUtils.getColor(270));
+        RenderUtils.Render2D.drawShadow(posX, posY, animateW, animateH + 20, 10, ColorUtils.getColor(0), ColorUtils.getColor(90), ColorUtils.getColor(180), ColorUtils.getColor(270));
         RenderUtils.Render2D.drawRound(posX, posY, animateW, animateH + 20, 5, ColorUtils.rgb(18, 18, 18));
         RenderUtils.Render2D.drawCornerRound(posX, posY, animateW, 16.5f, 5, ColorUtils.rgb(25, 25, 25), RenderUtils.Render2D.Corner.TOP);
         FontManager.sfBold[18].drawCenteredString(matrixStack, GradientUtil.gradient("Keybinds"), posX + animateW / 2f, posY + 6, -1);
@@ -225,13 +225,15 @@ public class HudNew extends Function {
     private int activeStaffs = 0;
     float slAnimateWidth = 0, slAnimateHeight = 0;
     float maxWidth;
+
+    boolean isReallyWorld = ClientUtil.isInReallyWorld();
     private void onStaffListRenderer(MatrixStack matrixStack) {
         float posX = staffOnlineDraggable.getX(), posY = staffOnlineDraggable.getY(), offset = 11;
         float width = Math.max(maxWidth, 85), height = activeStaffs * offset;
         slAnimateWidth = MathUtil.lerp(slAnimateWidth, width, 15);
         slAnimateHeight = MathUtil.lerp(slAnimateHeight, height, 15);
 
-        RenderUtils.Render2D.drawShadow(posX, posY, slAnimateWidth, slAnimateHeight + 20, 8, ColorUtils.getColor(0), ColorUtils.getColor(90), ColorUtils.getColor(180), ColorUtils.getColor(270));
+        RenderUtils.Render2D.drawShadow(posX, posY, slAnimateWidth, slAnimateHeight + 20, 10, ColorUtils.getColor(0), ColorUtils.getColor(90), ColorUtils.getColor(180), ColorUtils.getColor(270));
         RenderUtils.Render2D.drawRound(posX, posY, slAnimateWidth, slAnimateHeight + 20, 5, ColorUtils.rgb(18, 18, 18));
         RenderUtils.Render2D.drawCornerRound(posX, posY, slAnimateWidth, 16.5f, 5, ColorUtils.rgb(25, 25, 25), RenderUtils.Render2D.Corner.TOP);
         FontManager.sfBold[18].drawCenteredString(matrixStack, GradientUtil.gradient("Staff Statistics"), posX + slAnimateWidth / 2f, posY + 6, -1);
@@ -246,8 +248,6 @@ public class HudNew extends Function {
             float prefixWidth = FontManager.sfBold[16].getWidth(prefix);
             float nameWidth = FontManager.sfBold[16].getWidth(name);
             float statusWidth = FontManager.sfBold[16].getWidth(staffPlayer.getStatus().string);
-
-            boolean isReallyWorld = ClientUtil.isConnectedToServer("reallyworld");
 
             FontManager.sfBold[16].drawPrefix(matrixStack, prefix, !isReallyWorld ? posX + 4 : posX + 2, offsetY, 255);
             FontManager.sfBold[16].drawString(matrixStack, name, !isReallyWorld ? posX + prefixWidth + 4 : posX + prefixWidth, offsetY, -1);
@@ -294,7 +294,7 @@ public class HudNew extends Function {
 
         potWidthAnim = MathUtil.lerp(potWidthAnim, width, 15);
         potHeigthAnim = MathUtil.lerp(potHeigthAnim, height, 15);
-        RenderUtils.Render2D.drawShadow(posX, posY, potWidthAnim, potHeigthAnim + 20, 8, ColorUtils.getColor(0), ColorUtils.getColor(90), ColorUtils.getColor(180), ColorUtils.getColor(270));
+        RenderUtils.Render2D.drawShadow(posX, posY, potWidthAnim, potHeigthAnim + 20, 10, ColorUtils.getColor(0), ColorUtils.getColor(90), ColorUtils.getColor(180), ColorUtils.getColor(270));
         RenderUtils.Render2D.drawRound(posX, posY, potWidthAnim, potHeigthAnim + 20, 5, ColorUtils.rgb(18, 18, 18));
         RenderUtils.Render2D.drawCornerRound(posX, posY, potWidthAnim, 16.5f, 5, ColorUtils.rgb(25, 25, 25), RenderUtils.Render2D.Corner.TOP);
         FontManager.sfBold[18].drawCenteredString(matrixStack, GradientUtil.gradient("Potions"), posX + potWidthAnim / 2f, posY + 6, -1);
@@ -379,75 +379,69 @@ public class HudNew extends Function {
     }
 
     private void onArmorRenderer(MatrixStack matrixStack) {
+        int posX = window.getScaledWidth() / 2 + 95;
+        int posY = window.getScaledHeight() - (16 + 2);
 
+        for (ItemStack itemStack : mc.player.getArmorInventoryList()) {
+            if (itemStack.isEmpty()) continue;
+
+            mc.getItemRenderer().renderItemAndEffectIntoGUI(itemStack, posX, posY);
+            mc.getItemRenderer().renderItemOverlayIntoGUI(mc.fontRenderer, itemStack, posX, posY, null);
+
+            posX += 16 + 2;
+        }
     }
-    final Animation targetHudAnimation = new EaseBackIn(400, 1, 1);
+    final Animation targetHudAnimation = new EaseBackIn(300, 1, 1);
     LivingEntity entity = null;
     Dragging dragging = NovaCore.getInstance().createDrag(this, "targetHud", 300, 300);
 
     private float hpAnim = 0, absorptionAnimation = 0.0f;
+
+    Vector4i vector4i;
+
     private void onTargetInfoRenderer(MatrixStack matrixStack) {
         float x = dragging.getX();
         float y = dragging.getY();
 
-        float width = 100;
-        float height = 37;
+        vector4i = new Vector4i(ColorUtils.rgb(70, 133, 70), ColorUtils.rgb(70, 133, 70), ColorUtils.rgb(15, 166, 15), ColorUtils.rgb(15, 166, 15));
+
+        float width = 105;
+        float height = 40;
 
         boolean out = !allow || stopWatch.isReached(1000);
         targetHudAnimation.setDuration(out ? 400 : 300);
         targetHudAnimation.setDirection(out ? Direction.BACKWARDS : Direction.FORWARDS);
-
-        StyleManager styleManager = NovaCore.getInstance().getStyleManager();
-
         entity = getTarget(entity);
 
         if (entity == null) return;
-        float hp = (ClientUtil.isConnectedToServer("reallyworld") ? getHealthFromScoreboard(entity)[0] : entity.getHealth());
+        float hp = isReallyWorld ? getHealthFromScoreboard(entity)[0] : entity.getHealth();
         float maxHp = entity.getMaxHealth();
         float healthAnimation = MathHelper.clamp(hp / maxHp, 0, 1);
         hpAnim = MathUtil.fast(hpAnim, healthAnimation, 10);
         absorptionAnimation = MathUtil.fast(absorptionAnimation, MathHelper.clamp(entity.getAbsorptionAmount() / maxHp, 0, 1), 10);
 
-        GlStateManager.pushMatrix();
-        sizeAnimation(x + (width / 2), y + (height / 2), targetHudAnimation.getOutput());
+        if (hp < 5) {
+            vector4i = new Vector4i(ColorUtils.rgb(100, 10, 10), ColorUtils.rgb(100, 10, 10), ColorUtils.rgb(200, 20, 20), ColorUtils.rgb(200, 20, 20));
+        } else if (hp < 14) {
+            vector4i = new Vector4i(ColorUtils.rgb(100, 100, 0), ColorUtils.rgb(100, 100, 0), ColorUtils.rgb(200, 200, 0), ColorUtils.rgb(200, 200, 0));
+        } else {
+            vector4i = new Vector4i(ColorUtils.rgb(70, 133, 70), ColorUtils.rgb(70, 133, 70), ColorUtils.rgb(15, 166, 15), ColorUtils.rgb(15, 166, 15));
+        }
+
+        MathUtil.scaleStart(x + (width / 2f), y + (height / 2f), targetHudAnimation.getOutput());
         RenderUtils.Render2D.drawShadow(x, y, width, height, 8, ColorUtils.getColor(0), ColorUtils.getColor(90), ColorUtils.getColor(180), ColorUtils.getColor(270));
         RenderUtils.Render2D.drawRound(x, y, width, height, 5, ColorUtils.rgb(25, 25, 25));
-        if (entity instanceof PlayerEntity)
-            RenderUtils.Render2D.drawRoundFace(x + 4.5f, y + 4.5f,28, 28, 5, 1, (AbstractClientPlayerEntity) entity);
-        else
-            RenderUtils.Render2D.drawRound(x + 4.5f, y + 4.5f,28, 28, 5, -1);
-        RenderUtils.Render2D.drawGradientRound(x + 34.5F, y + 25.5f, (width - 40), 6, new Vector4f(3, 3, 3, 3), ColorUtils.rgb(14, 14, 14), ColorUtils.rgb(14, 14, 14), ColorUtils.rgb(14, 14, 14), ColorUtils.rgb(14, 14, 14));
-        RenderUtils.Render2D.drawGradientRound(x + 34.5F, y + 25.5f, (width - 40) * hpAnim, 6, new Vector4f(3, 3, 3, 3), styleManager.getCurrentStyle().getFirstColor().getRGB(), styleManager.getCurrentStyle().getFirstColor().getRGB(), styleManager.getCurrentStyle().getSecondColor().getRGB(), styleManager.getCurrentStyle().getSecondColor().getRGB());
-        RenderUtils.Render2D.drawGradientRound(x + 34.5F, y + 25.5f, (width - 40) * absorptionAnimation, 6, new Vector4f(3, 3, 3, 3), ColorUtils.rgba(255, 200, 50, 255), ColorUtils.rgba(255, 200, 50, 255), ColorUtils.rgba(255, 150, 0, 255), ColorUtils.rgba(255, 150, 0, 255));
-        FontManager.sfBold[16].drawScissorString(matrixStack, entity.getName().getString(), x + 34.5F, y + 8.5f, -1, 50);
-        String formattedHp = String.format("%.1f", hp); // �������������� �� ������ ����� ����� �������
-        FontManager.sfBold[14].drawString(matrixStack, "HP: " + formattedHp, x + 34.5F, y + 19.0f, -1);
-        GlStateManager.popMatrix();
+        if (entity instanceof PlayerEntity) RenderUtils.Render2D.drawRoundFace(x + 4.5f, y + 4.5f, 31, 31, 5, 1,(AbstractClientPlayerEntity) entity);
+        FontManager.sfBold[17].drawScissorString(matrixStack,entity.getName().getString(), x + 39, y + 9, -1, (int) (width - 55));
+        String formattedHp = String.format("%.1f", hp);
+        FontManager.sfBold[14].drawString(matrixStack, "HP: " + formattedHp,x + 39, y + 19, -1);
+        RenderUtils.Render2D.drawGradientRound(x + 39, y + 26.5f, (width - 43), 9, new Vector4f(4.5f, 4.5f, 4.5f, 4.5f), ColorUtils.rgb(35, 35, 35), ColorUtils.rgb(35, 35, 35), ColorUtils.rgb(35, 35, 35), ColorUtils.rgb(35, 35, 35));
+        RenderUtils.Render2D.drawGradientRound(x + 39, y + 26.5f, (width - 43) * hpAnim, 9, new Vector4f(4.5f, 4.5f, 4.5f, 4.5f), vector4i.x, vector4i.y, vector4i.z, vector4i.w);
+        RenderUtils.Render2D.drawGradientRound(x + 39, y + 26.5f, (width - 43) * absorptionAnimation, 9, new Vector4f(4.5f, 4.5f, 4.5f, 4.5f), ColorUtils.rgb(255, 200, 0), ColorUtils.rgb(255, 200, 0), ColorUtils.rgb(255, 150, 0), ColorUtils.rgb(255, 150, 0));
+        MathUtil.scaleEnd();
 
         dragging.setWidth(width);
         dragging.setHeight(height);
-    }
-
-    private void onSecondTypeTargetHud(MatrixStack matrixStack) {
-//        float x = drag.getX();
-//        float y = drag.getY();
-//
-//        float width = 115;
-//        float height = 40;
-//        entity = getTarget(entity);
-//
-//        boolean out = !allow || stopWatch.isReached(1000);
-//        targetHudAnimation.setDuration(out ? 400 : 300);
-//        targetHudAnimation.setDirection(out ? Direction.BACKWARDS : Direction.FORWARDS);
-//        if (entity == null) return;
-//
-//        GlStateManager.pushMatrix();
-//        sizeAnimation(x + (width / 2), y + (height / 2), targetHudAnimation.getOutput());
-//        RenderUtils.Render2D.drawRound(x, y, width, height, 5, ColorUtils.rgb(20, 20, 20));
-//        GlStateManager.popMatrix();
-//
-//        drag.setWidth(width);
-//        drag.setHeight(height);
     }
 
     public float[] getHealthFromScoreboard(LivingEntity target) {
@@ -462,11 +456,6 @@ public class HudNew extends Function {
             });
         }
         return new float[]{ref.hp, ref.maxHp};
-    }
-    public static void sizeAnimation(double width, double height, double scale) {
-        GlStateManager.translated(width, height, 0);
-        GlStateManager.scaled(scale, scale, scale);
-        GlStateManager.translated(-width, -height, 0);
     }
     public static String calculateBPS() {
         return String.format("%.1f", Math.hypot(mc.player.getPosX() - mc.player.prevPosX, mc.player.getPosZ() - mc.player.prevPosZ) * (double) mc.timer.timerSpeed * 20.0D);

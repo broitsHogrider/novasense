@@ -1,18 +1,18 @@
 package ru.novacore.functions.impl.movement;
 
-import com.google.common.eventbus.Subscribe;
 import net.minecraft.item.Items;
 import net.minecraft.network.play.client.CEntityActionPacket;
 import net.minecraft.network.play.client.CPlayerTryUseItemPacket;
 import net.minecraft.util.Hand;
-import ru.novacore.events.EventUpdate;
+import ru.novacore.events.EventHandler;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
 import ru.novacore.utils.math.StopWatch;
 import ru.novacore.utils.player.InventoryUtil;
 
-@FunctionInfo(name = "Anti Elytra Target", category = Category.Movement)
+@FunctionInfo(name = "AntiTarget", category = Category.Movement)
 public class AntiTarget extends Function {
 
 
@@ -24,7 +24,7 @@ public class AntiTarget extends Function {
       super.onEnable();
    }
 
-   @Subscribe
+   @EventHandler
    public void onUpdate(EventUpdate eventUpdate) {
       if (mc.player.isElytraFlying()) {
          mc.player.rotationPitch = -35.0F;
@@ -37,8 +37,8 @@ public class AntiTarget extends Function {
          mc.player.connection.sendPacket(new CEntityActionPacket(mc.player, CEntityActionPacket.Action.START_FALL_FLYING));
       }
 
-      int hbSlot = InventoryUtil.getInstance().getSlotInInventoryOrHotbar(Items.FIREWORK_ROCKET, true);
-      int invSlot = InventoryUtil.getInstance().getSlotInInventoryOrHotbar(Items.FIREWORK_ROCKET, false);
+      int hbSlot = InventoryUtil.getSlotInInventoryOrHotbar(Items.FIREWORK_ROCKET, true);
+      int invSlot = InventoryUtil.getSlotInInventoryOrHotbar(Items.FIREWORK_ROCKET, false);
 
       if (invSlot != -1 || hbSlot != -1) {
          if (!mc.player.getCooldownTracker().hasCooldown(Items.FIREWORK_ROCKET) && stopWatch.hasElapsed(FIREWORK_DELAY)) {

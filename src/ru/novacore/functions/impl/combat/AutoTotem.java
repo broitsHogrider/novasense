@@ -1,18 +1,19 @@
 package ru.novacore.functions.impl.combat;
 
-import com.google.common.eventbus.Subscribe;
+import ru.novacore.events.EventHandler;
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EnderCrystalEntity;
-import net.minecraft.entity.item.TNTEntity;
-import net.minecraft.entity.item.minecart.TNTMinecartEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.item.AirItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.SkullItem;
-import net.minecraft.potion.Effects;
-import ru.novacore.events.EventUpdate;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import ru.novacore.events.render.EventDisplay;
+import ru.novacore.events.player.EventUpdate;
 import ru.novacore.functions.api.Category;
 import ru.novacore.functions.api.Function;
 import ru.novacore.functions.api.FunctionInfo;
@@ -20,166 +21,180 @@ import ru.novacore.functions.settings.impl.BooleanSetting;
 import ru.novacore.functions.settings.impl.ModeListSetting;
 import ru.novacore.functions.settings.impl.SliderSetting;
 import ru.novacore.utils.player.InventoryUtil;
-import ru.novacore.utils.player.WorldUtils;
+import ru.novacore.utils.render.font.Fonts;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @FunctionInfo(name = "AutoTotem", category = Category.Combat)
 public class AutoTotem extends Function {
-    private final SliderSetting health = new SliderSetting("Здоровье", 3.5F, 1.0F, 20.0F, 0.05F);
-    private final BooleanSetting swapBack = new BooleanSetting("Возвращать предмет", true);
-    private final BooleanSetting noBallSwitch = new BooleanSetting("Не свапать если шар", false);
-    
-    private final ModeListSetting mode = new ModeListSetting("Настройки",
-            new BooleanSetting("Золотые сердца", true),
-            new BooleanSetting("Кристалл", true), 
-            new BooleanSetting("Обсидиан", false),
-            new BooleanSetting("Якорь", false),
-            new BooleanSetting("Падение", true),
-            new BooleanSetting("Кристалл в руке", true),
-            new BooleanSetting("Здоровье на элитре", true));
-    
-    private final SliderSetting radiusExplosion = (new SliderSetting("Радиус до обсидиана", 6.0F, 1.0F, 8.0F, 1.0F)).setVisible(() -> this.mode.get(1).get());
-    private final SliderSetting radiusObs = (new SliderSetting("Радиус до кристалла", 6.0F, 1.0F, 8.0F, 1.0F)).setVisible(() -> this.mode.get(2).get());
-    private final SliderSetting radiusAnch = (new SliderSetting("Радиус до якоря", 6.0F, 1.0F, 8.0F, 1.0F)).setVisible(() -> this.mode.get(2).get());
-    private final SliderSetting HPElytra = (new SliderSetting("Здоровье на элитре", 6.0F, 1.0F, 20.0F, 0.005F)).setVisible(() -> this.mode.getValueByName("Здоровье на элитре").get());
-    private final SliderSetting DistanceFall = (new SliderSetting("Дистанция падение", 20.0F, 3.0F, 50.0F, 0.005F)).setVisible(() -> this.mode.getValueByName("Падение").get());
-    int oldItem = -1;
+    private final SliderSetting health = new SliderSetting("Здоровье",  4F, 1F, 20F, 1F);
+    private final BooleanSetting drawCounter = new BooleanSetting("Отображать кол-во",  true);
+    private final BooleanSetting swapBack = new BooleanSetting("Возвращать",  true);
+
+    private final BooleanSetting noBallSwitch = new BooleanSetting("Не брать при шаре", false);
+
+    private final ModeListSetting mode = new ModeListSetting("Условие",
+                    new BooleanSetting("Поглощение", true),
+                    new BooleanSetting("Обсидиан", false),
+                    new BooleanSetting("Кристалл", true),
+                    new BooleanSetting("Якорь", true),
+                    new BooleanSetting("Падение", true)
+            );
+
+    private final SliderSetting obsidianRadius = new SliderSetting("Радиус от обсы", 6, 1, 8, 1).setVisible(() -> !mode.getValueByName("Обсидиан").get());
+    private final SliderSetting crystalRadius = new SliderSetting("Радиус от кристалла", 6, 1, 8, 1).setVisible(() -> !mode.getValueByName("Кристалл").get());
+    private final SliderSetting anchorRadius = new SliderSetting("Радиус от якоря", 6, 1, 8, 1).setVisible(() -> !mode.getValueByName("Якорь").get());
+
+    private int swapBackSlot = -1;
+    private final ItemStack stack = new ItemStack(Items.TOTEM_OF_UNDYING);
 
     public AutoTotem() {
-        this.addSettings(this.mode, this.health, this.swapBack, this.noBallSwitch, this.radiusExplosion, this.HPElytra, this.DistanceFall);
+        addSettings(health, drawCounter, swapBack, noBallSwitch, mode, obsidianRadius, crystalRadius, anchorRadius);
     }
 
-
-    @Subscribe
-    private void handleEventUpdate(EventUpdate event) {
+    @EventHandler
+    private void onUpdate(EventUpdate eventUpdate) {
         int slot = InventoryUtil.getItemSlot(Items.TOTEM_OF_UNDYING);
+        boolean totemInHand = mc.player.getHeldItemOffhand().getItem().equals(Items.TOTEM_OF_UNDYING);
         boolean handNotNull = !(mc.player.getHeldItemOffhand().getItem() instanceof AirItem);
-        boolean totemInHand = mc.player.getHeldItemOffhand().getItem() == Items.TOTEM_OF_UNDYING || mc.player.getHeldItemMainhand().getItem() == Items.TOTEM_OF_UNDYING;
-        if (this.condition()) {
-            if (slot >= 0 && !totemInHand) {
-                mc.playerController.windowClick(0, slot, 40, ClickType.SWAP, mc.player);
-                if (handNotNull && this.oldItem == -1) {
-                    this.oldItem = slot;
+
+        if (condition()) {
+            if (slot >= 0) {
+                if (!totemInHand) {
+                    mc.playerController.windowClick(0, slot, 1, ClickType.PICKUP, mc.player);
+                    mc.playerController.windowClick(0, 45, 1, ClickType.PICKUP, mc.player);
+                    if (handNotNull && swapBack.getValue()) {
+                        mc.playerController.windowClick(0, slot, 0, ClickType.PICKUP, mc.player);
+                        if (swapBackSlot == -1) swapBackSlot = slot;
+                    }
                 }
             }
-        } else if (this.oldItem != -1 && this.swapBack.get()) {
-            mc.playerController.windowClick(0, this.oldItem, 40, ClickType.SWAP, mc.player);
-            this.oldItem = -1;
+
+        } else if (swapBackSlot >= 0) {
+            mc.playerController.windowClick(0, swapBackSlot, 0, ClickType.PICKUP, mc.player);
+            mc.playerController.windowClick(0, 45, 0, ClickType.PICKUP, mc.player);
+            if (handNotNull && swapBack.getValue()) {
+                mc.playerController.windowClick(0, swapBackSlot, 0, ClickType.PICKUP, mc.player);
+            }
+            swapBackSlot = -1;
         }
-
     }
+    
+    @EventHandler
+    private void onDisplay(EventDisplay eventDisplay) {
+        if (!drawCounter.getValue())
+            return;
 
+        if (getTotemCount() > 0) {
+            Fonts.sfbold.drawTextWithOutline(eventDisplay.getMatrixStack(), getTotemCount() + "x", mc.getMainWindow().getScaledWidth() / 2f + 12F,
+                    mc.getMainWindow().getScaledHeight() / 2f + 24, -1, 6f, 0.05f);
+            GlStateManager.pushMatrix();
+            GlStateManager.disableBlend();
+            mc.getItemRenderer().renderItemAndEffectIntoGUI(stack, (int) (mc.getMainWindow().getScaledWidth() / 2F - 8), (int) (mc.getMainWindow().getScaledHeight() / 2F + 20));
+            GlStateManager.popMatrix();
+        }
+    }
+    
     private boolean condition() {
-        float absorption = this.mode.get(0).get() && mc.player.isPotionActive(Effects.ABSORPTION) ? mc.player.getAbsorptionAmount() : 0.0F;
-        if (mc.player.getHealth() + absorption <= this.health.getValue().floatValue()) {
+        float health = mc.player.getHealth();
+        if (mode.getValueByName("Поглощение").get()) {
+            health += mc.player.getAbsorptionAmount();
+        }
+
+        if (this.health.get() >= health) {
             return true;
-        } else {
-            if (!this.isBall()) {
-                if (this.checkCrystal()) {
-                    return true;
-                }
+        }
 
-                if (this.checkObsidian()) {
-                    return true;
-                }
-
-                if (this.checkAnchor()) {
-                    return true;
-                }
-
-                if (this.checkPlayerItemCrystal()) {
-                    return true;
+        if (!isBall()) {
+            for (Entity entity : mc.world.getAllEntities()) {
+                if (mode.getValueByName("Кристалл").get()) {
+                    if (entity instanceof EnderCrystalEntity && mc.player.getDistanceSq(entity) <= crystalRadius.get()) {
+                        return true;
+                    }
                 }
             }
 
-            return this.checkHPElytra() ? true : this.checkFall();
-        }
-    }
-
-    private boolean checkHPElytra() {
-        if (!this.mode.getValueByName("Здоровье на элитре").get()) {
-            return false;
-        } else {
-            return (mc.player.inventory.armorInventory.get(2)).getItem() == Items.ELYTRA && mc.player.getHealth() <= this.HPElytra.getValue().floatValue();
-        }
-    }
-
-    private boolean checkPlayerItemCrystal() {
-        if (!this.mode.getValueByName("Кристалл в руке").get()) {
-            return false;
-        } else {
-            for(PlayerEntity entity : mc.world.getPlayers()) {
-                if (mc.player != entity && (entity.getHeldItemOffhand().getItem() == Items.END_CRYSTAL || entity.getHeldItemMainhand().getItem() == Items.END_CRYSTAL) && mc.player.getDistance(entity) < 6.0F) {
-                    return true;
-                }
+            if (mode.getValueByName("Якорь").get()) {
+                BlockPos pos = getSphere(mc.player.getPosition(), obsidianRadius.get(), 6, false, true, 0).stream().filter(this::IsValidBlockPosAnchor).min(Comparator.comparing(blockPos -> getDistanceToBlock(mc.player, blockPos))).orElse(null);
+                return pos != null;
             }
 
-            return false;
+            if (mode.getValueByName("Обсидиан").get()) {
+                BlockPos pos = getSphere(mc.player.getPosition(), anchorRadius.get(), 6, false, true, 0).stream().filter(this::IsValidBlockPosObisdian).min(Comparator.comparing(blockPos -> getDistanceToBlock(mc.player, blockPos))).orElse(null);
+                return pos != null;
+            }
+            if (mode.getValueByName("Падение").get()) {
+                return mc.player.fallDistance >= 30;
+            }
         }
+
+        return false;
     }
 
-    private boolean checkFall() {
-        if (!this.mode.get(4).get()) {
+    public boolean isBall() {
+        if (!noBallSwitch.getValue()) {
             return false;
-        } else {
-            return mc.player.fallDistance > this.DistanceFall.getValue().floatValue();
         }
+        ItemStack stack = mc.player.getHeldItemOffhand();
+        return stack.getDisplayName().getString().toLowerCase().contains("шар") || stack.getDisplayName().getString().toLowerCase().contains("голова") || stack.getDisplayName().getString().toLowerCase().contains("head");
     }
 
-    private boolean isBall() {
-        if (this.mode.get(3).get() && mc.player.fallDistance > 5.0F) {
-            return false;
-        } else {
-            return noBallSwitch.get() && mc.player.getHeldItemOffhand().getItem() instanceof SkullItem;
+    private int getTotemCount() {
+        int count = 0;
+        for (int i = 0; i < mc.player.inventory.getSizeInventory(); i++) {
+            ItemStack stack = mc.player.inventory.getStackInSlot(i);
+            if (stack.getItem().equals(Items.TOTEM_OF_UNDYING)) {
+                count++;
+            }
         }
+        return count;
     }
 
-    private boolean checkObsidian() {
-        if (!this.mode.get(2).get()) {
-            return false;
-        } else {
-            return WorldUtils.TotemUtil.getBlock(this.radiusObs.getValue().floatValue(), Blocks.OBSIDIAN) != null;
-        }
+    private boolean IsValidBlockPosObisdian(BlockPos pos) {
+        BlockState state = mc.world.getBlockState(pos);
+        return state.getBlock().equals(Blocks.OBSIDIAN);
     }
 
-    private boolean checkAnchor() {
-        if (!this.mode.get(3).get()) {
-            return false;
-        } else {
-            return WorldUtils.TotemUtil.getBlock(this.radiusAnch.getValue().floatValue(), Blocks.RESPAWN_ANCHOR) != null;
-        }
+    private boolean IsValidBlockPosAnchor(BlockPos pos) {
+        BlockState state = mc.world.getBlockState(pos);
+        return state.getBlock().equals(Blocks.RESPAWN_ANCHOR);
     }
 
-    private boolean checkCrystal() {
-        if (!this.mode.get(1).get()) {
-            return false;
-        } else {
-            for(Entity entity : mc.world.getAllEntities()) {
-                if (entity instanceof EnderCrystalEntity && mc.player.getDistance(entity) <= this.radiusExplosion.getValue().floatValue()) {
-                    return true;
-                }
+    private List<BlockPos> getSphere(final BlockPos blockPos, final float radius, final int height, final boolean hollow, final boolean semiHollow, final int yOffset) {
+        final ArrayList<BlockPos> spherePositions = new ArrayList<>();
+        final int x = blockPos.getX();
+        final int y = blockPos.getY();
+        final int z = blockPos.getZ();
+        final int minX = x - (int) radius;
+        final int maxX = x + (int) radius;
+        final int minZ = z - (int) radius;
+        final int maxZ = z + (int) radius;
 
-                if ((entity instanceof TNTEntity || entity instanceof TNTMinecartEntity) && mc.player.getDistance(entity) <= this.radiusExplosion.getValue().floatValue()) {
-                    return true;
+        for (int xPos = minX; xPos <= maxX; ++xPos) {
+            for (int zPos = minZ; zPos <= maxZ; ++zPos) {
+                final int minY = semiHollow ? (y - (int) radius) : y;
+                final int maxY = semiHollow ? (y + (int) radius) : (y + height);
+                for (int yPos = minY; yPos < maxY; ++yPos) {
+                    final double distance = (x - xPos) * (x - xPos) + (z - zPos) * (z - zPos) + (semiHollow ? ((y - yPos) * (y - yPos)) : 0);
+                    if (distance < radius * radius && (!hollow || distance >= (radius - 1.0f) * (radius - 1.0f))) {
+                        spherePositions.add(new BlockPos(xPos, yPos + yOffset, zPos));
+                    }
                 }
             }
-
-            return false;
         }
+        return spherePositions;
     }
 
-    private void reset() {
-        this.oldItem = -1;
+    private double getDistanceToBlock(Entity entity, final BlockPos blockPos) {
+        return getDistance(entity.getPosX(), entity.getPosY(), entity.getPosZ(), blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 
-    @Override
-    public void onEnable() {
-        this.reset();
-        super.onEnable();
-    }
-
-    @Override
-    public void onDisable() {
-        this.reset();
-        super.onDisable();
+    private double getDistance(final double x1, final double y1, final double z1, final double x2, final double y2, final double z2) {
+        final double x = x1 - x2;
+        final double y = y1 - y2;
+        final double z = z1 - z2;
+        return MathHelper.sqrt(x * x + y * y + z * z);
     }
 }

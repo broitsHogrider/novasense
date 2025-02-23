@@ -43,11 +43,14 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import ru.novacore.NovaCore;
+import ru.novacore.events.EventSystem;
 import ru.novacore.command.CommandDispatcher;
 import ru.novacore.command.impl.DispatchResult;
-import ru.novacore.events.*;
+import ru.novacore.events.input.EventMotion;
+import ru.novacore.events.other.InventoryCloseEvent;
+import ru.novacore.events.player.*;
 import ru.novacore.functions.api.FunctionRegistry;
-import ru.novacore.functions.impl.misc.AntiPush;
+import ru.novacore.functions.impl.misc.NoPush;
 import ru.novacore.functions.impl.misc.SelfDestruct;
 import ru.novacore.utils.math.StopWatch;
 
@@ -225,7 +228,7 @@ public class ClientPlayerEntity extends AbstractClientPlayerEntity {
                 NovaCore.getInstance().playerOnServer = true;
             }
 
-            NovaCore.getInstance().getEventBus().post(eventUpdate);
+            EventSystem.call(eventUpdate);
             super.tick();
 
             if (this.isPassenger()) {
@@ -277,7 +280,7 @@ public class ClientPlayerEntity extends AbstractClientPlayerEntity {
 
         boolean flag = this.isSprinting();
         ActionEvent ea = new ActionEvent(flag);
-        NovaCore.getInstance().getEventBus().post(ea);
+        EventSystem.call(ea);
 
         if (flag != this.serverSprintState) {
             CEntityActionPacket.Action centityactionpacket$action = flag ? CEntityActionPacket.Action.START_SPRINTING : CEntityActionPacket.Action.STOP_SPRINTING;
@@ -309,7 +312,7 @@ public class ClientPlayerEntity extends AbstractClientPlayerEntity {
             eventMotion.setOnGround(this.onGround);
 
 
-            NovaCore.getInstance().getEventBus().post(eventMotion);
+            EventSystem.call(eventMotion);
 
             if (eventMotion.isCancel()) {
                 eventMotion.open();
@@ -354,7 +357,7 @@ public class ClientPlayerEntity extends AbstractClientPlayerEntity {
             this.prevOnGround = eventMotion.isOnGround();
             this.autoJumpEnabled = this.mc.gameSettings.autoJump;
         }
-        NovaCore.getInstance().getEventBus().post(new EventPostMotion());
+        EventSystem.call(new EventPostMotion());
         if (eventMotion.getPostMotion() != null) {
             eventMotion.getPostMotion().run();
         }
@@ -419,7 +422,7 @@ public class ClientPlayerEntity extends AbstractClientPlayerEntity {
     @Override
     public void closeScreen() {
         InventoryCloseEvent event = new InventoryCloseEvent(this.openContainer.windowId);
-        NovaCore.getInstance().getEventBus().post(event);
+        EventSystem.call(event);
         if (!event.isCancel()) {
             this.connection.sendPacket(new CCloseWindowPacket(this.openContainer.windowId));
         }
@@ -584,9 +587,9 @@ public class ClientPlayerEntity extends AbstractClientPlayerEntity {
 
     private boolean shouldBlockPushPlayer(BlockPos pos) {
         FunctionRegistry functionRegistry = NovaCore.getInstance().getFunctionRegistry();
-        AntiPush antiPush = functionRegistry.getAntiPush();
+        NoPush noPush = functionRegistry.getNoPush();
 
-        if (antiPush.isState() && antiPush.getModes().getValueByName("Блоки").get()) {
+        if (noPush.isState() && noPush.getModes().getValueByName("Блоки").get()) {
             return false;
         }
 
@@ -602,7 +605,7 @@ public class ClientPlayerEntity extends AbstractClientPlayerEntity {
      */
     @Override
     public void setSprinting(boolean sprinting) {
-        NovaCore.getInstance().getEventBus().post(sprintEvent);
+        EventSystem.call(sprintEvent);
         if (sprintEvent.isCancel()) {
             super.setSprinting(false);
             this.sprintingTicksLeft = 0;
@@ -830,7 +833,7 @@ public class ClientPlayerEntity extends AbstractClientPlayerEntity {
         this.mc.getTutorial().handleMovement(this.movementInput);
 
         if (this.isHandActive() && !this.isPassenger()) {
-            NovaCore.getInstance().getEventBus().post(noSlowEvent);
+            EventSystem.call(noSlowEvent);
 
             if (!noSlowEvent.isCancel()) {
                 this.movementInput.moveStrafe *= 0.2F;
